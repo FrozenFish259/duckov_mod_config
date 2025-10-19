@@ -10,6 +10,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+using Utilities;
+
 namespace ModConfig
 {
     public class ModBehaviour : Duckov.Modding.ModBehaviour
@@ -82,9 +84,16 @@ namespace ModConfig
 
                 //设置描述
                 //获取第一层子节点中有tmpugui的节点
-                TextMeshProUGUI descriptionTMPUGUI = dropdownListPrefabClone.GetComponentsInChildren<TextMeshProUGUI>()
-                    .FirstOrDefault(tmp => tmp.transform.parent == dropdownListPrefabClone.transform);
-                descriptionTMPUGUI.SetText(description, true);
+                OptionsUIEntry_Dropdown dropdownUIEntry = dropdownListPrefabClone.GetComponent<OptionsUIEntry_Dropdown>();
+                var label = ReflectionHelper.GetFieldValue<TextMeshProUGUI>(dropdownUIEntry, "label");
+                label.SetText(description, true);
+
+                //修改provider
+                DropDownOptionsProvider provider = dropdownUIEntry.AddComponent<DropDownOptionsProvider>();
+                provider.init(key, description, options, valueType, defaultValue);
+
+                ReflectionHelper.SetFieldValue(dropdownUIEntry, "provider",
+                    provider);
 
                 dropdownListPrefabClone.transform.SetParent(modContent.transform);
 
