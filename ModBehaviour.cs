@@ -1,4 +1,5 @@
 ﻿using Duckov.Options.UI;
+using Duckov.Utilities;
 using SodaCraft.Localizations;
 using System;
 using System.Collections.Generic;
@@ -29,9 +30,7 @@ namespace ModConfig
         /// <param name="options"></param>
         public static void AddDropdownList(string name, SortedDictionary<string, object> options, Type valueType)
         {
-            // Canvas/MainMenuContainer/Menu/OptionsPanel
-            // --Tabs 标签组
-            // --ScrollView 选项区域
+            //TODO: 添加下拉列表
 
 
             Debug.Log("已添加下拉选项config:" + name);
@@ -191,6 +190,10 @@ namespace ModConfig
             Destroy(modTabButton.GetComponentInChildren<TextLocalizor>(true));
             tabName.SetText("Mod Settings");
 
+            //清空内容
+            ModBehaviour.modContent.transform.DestroyAllChildren();
+
+            //TODO: 接下来要添加待插入的config项
         }
 
         private void InvokeSetup(OptionsPanel optionsPanel)
