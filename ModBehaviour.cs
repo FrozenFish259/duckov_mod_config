@@ -77,8 +77,16 @@ namespace ModConfig
         {
             //TODO: 添加下拉列表
             AddConfig(() => {
-                GameObject dropdownListPrefab = Instantiate(ModBehaviour.dropdownListPrefab);
+                GameObject dropdownListPrefabClone = Instantiate(ModBehaviour.dropdownListPrefab);
+                dropdownListPrefabClone.SetActive(true);
 
+                //设置描述
+                //获取第一层子节点中有tmpugui的节点
+                TextMeshProUGUI descriptionTMPUGUI = dropdownListPrefabClone.GetComponentsInChildren<TextMeshProUGUI>()
+                    .FirstOrDefault(tmp => tmp.transform.parent == dropdownListPrefabClone.transform);
+                descriptionTMPUGUI.SetText(description, true);
+
+                dropdownListPrefabClone.transform.SetParent(modContent.transform);
 
                 Debug.Log("已添加下拉选项config:" + description);
             });            
