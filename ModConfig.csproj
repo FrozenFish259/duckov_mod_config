@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <!-- This should be the folder that contains Duckov.exe -->
+    <!-- 下面这行里填写你的鸭科夫安装路径，这样编译器就能找到相关的dll文件 -->
+    <DuckovPath>D:\SteamLibrary\steamapps\common\Escape from Duckov</DuckovPath>
+    <ManagedPath>$(DuckovPath)\Duckov_Data\Managed</ManagedPath>
+    <BaseOutputPath></BaseOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+
+    <!-- 包含所有 DLL -->
+    <AllDlls Include="$(ManagedPath)\*.dll" />
+
+    <!-- 定义要排除的系统 DLL -->
+    <SystemDlls Include="$(ManagedPath)\mscorlib.dll;&#xA;                      $(ManagedPath)\System.dll;&#xA;                      $(ManagedPath)\System.*.dll;&#xA;                      $(ManagedPath)\Microsoft.*.dll;&#xA;                      $(ManagedPath)\netstandard.dll;&#xA;                      $(ManagedPath)\WindowsBase.dll" />
+    <Content Include="Release\preview.png" />
+    <None Include="Release\info.ini" />
+
+    <!-- 引用非系统 DLL -->
+    <Reference Include="@(AllDlls)" Exclude="@(SystemDlls)" />
+
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Release\Debug\netstandard2.1\" />
+  </ItemGroup> 
+</Project>
