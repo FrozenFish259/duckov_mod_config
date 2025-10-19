@@ -47,7 +47,6 @@ namespace ModConfig
 
         void OnEnable()
         {
-            CreateModSettingTab();
             TestAddDropDownlist();
         }
 
@@ -177,6 +176,9 @@ namespace ModConfig
 
             //这里调用下OptionsPanel的Setup来更新之前刚插入的克隆出来的mod标签页
             InvokeSetup(optionsPanel);
+
+            /////////////从这里开始已经成功创建了一个能够正常工作的标签页了/////////////
+            //接下来需要修改下标签页的名称, 然后清空tabClone里面没用的选项
         }
 
         private void InvokeSetup(OptionsPanel optionsPanel)
