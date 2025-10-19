@@ -15,14 +15,14 @@
 
     <!-- 定义要排除的系统 DLL -->
     <SystemDlls Include="$(ManagedPath)\mscorlib.dll;&#xA;                      $(ManagedPath)\System.dll;&#xA;                      $(ManagedPath)\System.*.dll;&#xA;                      $(ManagedPath)\Microsoft.*.dll;&#xA;                      $(ManagedPath)\netstandard.dll;&#xA;                      $(ManagedPath)\WindowsBase.dll" />
+    <Compile Remove="Release\Debug\**" />
+    <EmbeddedResource Remove="Release\Debug\**" />
+    <None Remove="Release\Debug\**" />
     <Content Include="Release\preview.png" />
     <None Include="Release\info.ini" />
 
     <!-- 引用非系统 DLL -->
     <Reference Include="@(AllDlls)" Exclude="@(SystemDlls)" />
 
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Release\Debug\netstandard2.1\" />
   </ItemGroup> 
 </Project>
