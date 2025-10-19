@@ -16,24 +16,72 @@ namespace ModConfig
     {
         private static bool createdModTab = false;
 
-        public static OptionsPanel_TabButton? modTabButton;
-        public static GameObject? modContent;
+        private static OptionsPanel_TabButton? modTabButton = null;
+        private static GameObject? modContent = null;
+
+        //从游戏里克隆一个设置分辨率的游戏对象
+        private static GameObject? dropdownListPrefab;
+
+        //待添加到modContent子节点的所有操作
+        private static Queue<Action> pendingConfigActions = new Queue<Action>();
+
+        /// <summary>
+        /// 添加配置项的通用方法（支持延迟初始化）
+        /// </summary>
+        public static void AddConfig(Action configAction)
+        {
+            if (modTabButton && modContent)
+            {
+                configAction.Invoke();
+            }
+            else
+            {
+                pendingConfigActions.Enqueue(configAction);
+                Debug.Log($"配置项已加入队列，等待mod菜单初始化。当前队列长度: {pendingConfigActions.Count}");
+            }
+        }
+
+        /// <summary>
+        /// 处理所有等待的配置项
+        /// </summary>
+        private void ProcessPendingConfigs()
+        {
+            if (modTabButton == null || modContent == null) return;
+
+            if (pendingConfigActions.Count > 0)
+            {
+                Debug.Log($"开始处理等待的配置项，剩余数量: {pendingConfigActions.Count}");
+                var configAction = pendingConfigActions.Dequeue();
+                try
+                {
+                    configAction.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"执行配置项时出错: {ex.Message}");
+                }
+            }
+        }
 
         /// <summary>
         /// 下拉选项, 类似分辨率选择
         /// 
-        /// name: 选项名称
+        /// key: 要存入Unity的pref的key
+        /// description: 选项名称
         /// options: key为显示的字符串, value表示该选项对应的要使用的值
         /// 
         /// 例: 添加分辨率选项AddDropdownList("分辨率", {"1980, 1080":0, "1280, 720":1});
         /// </summary>
         /// <param name="options"></param>
-        public static void AddDropdownList(string name, SortedDictionary<string, object> options, Type valueType)
+        public static void AddDropdownList(string key, string description, SortedDictionary<string, object> options, Type valueType, object defaultValue)
         {
             //TODO: 添加下拉列表
+            AddConfig(() => {
+                GameObject dropdownListPrefab = Instantiate(ModBehaviour.dropdownListPrefab);
 
 
-            Debug.Log("已添加下拉选项config:" + name);
+                Debug.Log("已添加下拉选项config:" + description);
+            });            
         }
 
         void Awake()
@@ -62,7 +110,7 @@ namespace ModConfig
 
         private void Update()
         {
-
+            ProcessPendingConfigs();
         }
 
         private void OnMenuAwake()
@@ -193,7 +241,19 @@ namespace ModConfig
             //清空内容
             ModBehaviour.modContent.transform.DestroyAllChildren();
 
-            //TODO: 接下来要添加待插入的config项
+            //TODO:克隆设置分辨率的dropdownList
+            OptionsUIEntry_Dropdown resolutionDropDown = tabClone.transform.parent.GetComponentsInChildren<OptionsUIEntry_Dropdown>(true)
+                .FirstOrDefault(dropdown => dropdown.gameObject.name == "UI_Resolution");
+
+            OptionsUIEntry_Dropdown resolutionDropDownClone = Instantiate(resolutionDropDown, modContent.transform);
+
+            resolutionDropDownClone.gameObject.name = "dropDownPrefab";
+            resolutionDropDownClone.gameObject.SetActive(false);
+
+            ModBehaviour.dropdownListPrefab = resolutionDropDownClone.gameObject;
+
+            //TODO: 处理所有等待的配置项
+            ProcessPendingConfigs();
         }
 
         private void InvokeSetup(OptionsPanel optionsPanel)
@@ -298,7 +358,7 @@ namespace ModConfig
 
         private void TestAddDropDownlist()
         {
-            string name = "测试";
+            string description = "测试";
             SortedDictionary<string, object> options = new SortedDictionary<string, object>()
             {
                 { "选项1", 1},
@@ -307,7 +367,7 @@ namespace ModConfig
                 { "选项4", 4},
             };
 
-            AddDropdownList(name, options, typeof(int));
+            AddDropdownList("test", description, options, typeof(int), 0);
         }
 
         override protected void OnAfterSetup()
