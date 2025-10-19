@@ -1,8 +1,11 @@
 ﻿using Duckov.Options.UI;
+using SodaCraft.Localizations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -12,8 +15,8 @@ namespace ModConfig
     {
         private static bool createdModTab = false;
 
-        public static OptionsPanel_TabButton modTabButton;
-        public static GameObject modContent;
+        public static OptionsPanel_TabButton? modTabButton;
+        public static GameObject? modContent;
 
         /// <summary>
         /// 下拉选项, 类似分辨率选择
@@ -33,7 +36,7 @@ namespace ModConfig
 
             Debug.Log("已添加下拉选项config:" + name);
         }
-      
+
         void Awake()
         {
             Debug.Log("ModConfig Mod Loaded!!!");
@@ -42,7 +45,7 @@ namespace ModConfig
 
         void OnDestroy()
         {
-          
+
         }
 
         void OnEnable()
@@ -54,7 +57,7 @@ namespace ModConfig
 
         void OnDisable()
         {
-           
+
         }
 
 
@@ -96,7 +99,7 @@ namespace ModConfig
 
             // 获取MainMenu场景中的OptionsPanel
             OptionsPanel optionsPanel = FindObjectsOfType<OptionsPanel>(true)
-                .FirstOrDefault(panel => panel.gameObject.scene.name == "MainMenu");
+                .FirstOrDefault(panel => panel.gameObject.scene.name == "DontDestroyOnLoad");
 
             if (optionsPanel == null)
             {
@@ -112,7 +115,7 @@ namespace ModConfig
             {
                 tabButtons = GetTabButtons(optionsPanel);
 
-                if(tabButtons == null)
+                if (tabButtons == null)
                 {
                     Debug.Log("无法反射获取tabButtons!!!!");
                     return;
@@ -141,7 +144,8 @@ namespace ModConfig
 
             tabButtons.Add(modTabButton);
 
-            if (modTabButton == null) {
+            if (modTabButton == null)
+            {
                 Debug.Log("无法获取克隆的GameObject的OptionsPanel_TabButton组件");
                 return;
             }
@@ -156,7 +160,7 @@ namespace ModConfig
                 Debug.Log("无法反射获取modTabButton的tab成员");
                 return;
             }
-            
+
             GameObject tabClone = Instantiate(tab, tab.transform.parent);
             tabClone.name = "modContent";
 
@@ -179,6 +183,14 @@ namespace ModConfig
 
             /////////////从这里开始已经成功创建了一个能够正常工作的标签页了/////////////
             //接下来需要修改下标签页的名称, 然后清空tabClone里面没用的选项
+
+            //修改标签页名称: 获取子对象, 然后获取其TMP组件
+            //1.modTabButton.gameObject -> Label -> TMP
+            TextMeshProUGUI? tabName = modTabButton.GetComponentInChildren<TextMeshProUGUI>(true);
+            //要关闭语言本地化组件
+            Destroy(modTabButton.GetComponentInChildren<TextLocalizor>(true));
+            tabName.SetText("Mod Settings");
+
         }
 
         private void InvokeSetup(OptionsPanel optionsPanel)
