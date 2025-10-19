@@ -22,8 +22,6 @@ namespace ModConfig
         private static GameObject? modContent = null;
 
         //从游戏里克隆一个设置分辨率的游戏对象
-        private static GameObject? modTitlePrefab;
-        //从游戏里克隆一个设置分辨率的游戏对象
         private static GameObject? dropdownListPrefab;
 
         //待添加到modContent子节点的所有操作
@@ -34,8 +32,9 @@ namespace ModConfig
         /// </summary>
         public static void AddConfig(Action configAction)
         {
-            if (modTabButton && modContent)
+            if (modTabButton != null && modContent != null)
             {
+                // 确保在正确的主线程中执行
                 configAction.Invoke();
             }
             else
@@ -50,102 +49,143 @@ namespace ModConfig
         /// </summary>
         private void ProcessPendingConfigs()
         {
-            if (modTabButton == null || modContent == null) return;
+            if (modTabButton == null || modContent == null)
+            {
+                Debug.Log("modTabButton 或 modContent 尚未初始化，跳过处理配置项");
+                return;
+            }
 
             if (pendingConfigActions.Count > 0)
             {
                 Debug.Log($"开始处理等待的配置项，剩余数量: {pendingConfigActions.Count}");
-                var configAction = pendingConfigActions.Dequeue();
-                try
+
+                // 安全地处理所有等待的配置项
+                while (pendingConfigActions.Count > 0)
                 {
-                    configAction.Invoke();
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"执行配置项时出错: {ex.Message}");
+                    var configAction = pendingConfigActions.Dequeue();
+                    try
+                    {
+                        configAction.Invoke();
+                        Debug.Log("配置项执行成功");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogError($"执行配置项时出错: {ex.Message}\n{ex.StackTrace}");
+                    }
                 }
             }
         }
 
         /// <summary>
         /// 下拉选项, 类似分辨率选择
-        /// 
-        /// modName: mod名称, 用于分类
-        /// key: 要存入Unity的pref的key
-        /// description: 选项名称
-        /// options: key为显示的字符串, value表示该选项对应的要使用的值
-        /// 
-        /// 例: 添加分辨率选项AddDropdownList("分辨率", {"1980, 1080":0, "1280, 720":1});
         /// </summary>
-        /// <param name="options"></param>
         public static void AddDropdownList(string modName, string key, string description, SortedDictionary<string, object> options, Type valueType, object defaultValue)
         {
-            //TODO: 添加下拉列表
             AddConfig(() => {
-                GameObject dropdownListPrefabClone = Instantiate(ModBehaviour.dropdownListPrefab);
-                dropdownListPrefabClone.SetActive(true);
-
-                //设置描述
-                //获取第一层子节点中有tmpugui的节点
-                OptionsUIEntry_Dropdown dropdownUIEntry = dropdownListPrefabClone.GetComponent<OptionsUIEntry_Dropdown>();
-                var label = ReflectionHelper.GetFieldValue<TextMeshProUGUI>(dropdownUIEntry, "label");
-                label.SetText(description, true);
-
-                //修改provider
-                DropDownOptionsProvider provider = dropdownUIEntry.AddComponent<DropDownOptionsProvider>();
-                provider.init(key, description, options, valueType, defaultValue);
-
-                ReflectionHelper.SetFieldValue(dropdownUIEntry, "provider",
-                    provider);
-
-                //这里要添加到以模组名称为名的GameObject下, 然后这个GameObject是modContent的子节点
-                //没有则创建
-                Transform modTitleTransform = null;
-                if (modContent.transform.Find(modName) == null)
+                // 安全检查
+                if (dropdownListPrefab == null)
                 {
-                    GameObject modNameTitleClone = Instantiate(ModBehaviour.modTitlePrefab, modContent.transform);
-                    modNameTitleClone.SetActive(true);
-                    modNameTitleClone.name = modName; // 重要：设置名字用于后续查找
-                    modNameTitleClone.transform.Find("Label").GetComponent<TextMeshProUGUI>().SetText(modName);
-                    modTitleTransform = modNameTitleClone.transform;
-                }
-                else
-                {
-                    modTitleTransform = modContent.transform.Find(modName);
+                    Debug.LogError("dropdownListPrefab 为 null，无法创建下拉列表");
+                    return;
                 }
 
-                dropdownListPrefabClone.transform.parent = modContent.transform;
-                // 找到mod标题的索引，然后设置dropdown在它后面
-                int titleIndex = modTitleTransform.GetSiblingIndex();
-                dropdownListPrefabClone.transform.SetSiblingIndex(titleIndex + 1);
+                if (modContent == null)
+                {
+                    Debug.LogError("modContent 为 null，无法添加下拉列表");
+                    return;
+                }
 
-                Debug.Log("已添加下拉选项config:" + description);
-            });            
+                try
+                {
+                    GameObject dropdownListPrefabClone = Instantiate(ModBehaviour.dropdownListPrefab);
+                    dropdownListPrefabClone.SetActive(true);
+
+                    // 设置描述
+                    OptionsUIEntry_Dropdown dropdownUIEntry = dropdownListPrefabClone.GetComponent<OptionsUIEntry_Dropdown>();
+                    if (dropdownUIEntry == null)
+                    {
+                        Debug.LogError("无法获取 OptionsUIEntry_Dropdown 组件");
+                        Destroy(dropdownListPrefabClone);
+                        return;
+                    }
+
+                    var label = ReflectionHelper.GetFieldValue<TextMeshProUGUI>(dropdownUIEntry, "label");
+                    if (label != null)
+                    {
+                        label.SetText(description, true);
+                    }
+
+                    // 修改provider
+                    DropDownOptionsProvider provider = dropdownUIEntry.AddComponent<DropDownOptionsProvider>();
+                    provider.init(key, description, options, valueType, defaultValue);
+
+                    ReflectionHelper.SetFieldValue(dropdownUIEntry, "provider", provider);
+
+                    // 创建或查找mod标题
+                    Transform modTitleTransform = modContent.transform.Find(modName);
+                    if (modTitleTransform == null)
+                    {
+                        GameObject modNameTitleClone = Instantiate(ModBehaviour.dropdownListPrefab, modContent.transform);
+                        modNameTitleClone.name = modName;
+                        modNameTitleClone.transform.DestroyAllChildren();
+
+                        // 创建标题文本
+                        GameObject titleTextObject = new GameObject("TitleText");
+                        titleTextObject.transform.SetParent(modNameTitleClone.transform);
+
+                        TextMeshProUGUI titleText = titleTextObject.AddComponent<TextMeshProUGUI>();
+                        titleText.SetText(modName);
+
+                        modNameTitleClone.SetActive(true);
+
+                        modTitleTransform = modNameTitleClone.transform;
+                    }
+
+                    // 设置父级和顺序
+                    dropdownListPrefabClone.transform.SetParent(modContent.transform, false);
+
+                    int titleIndex = modTitleTransform.GetSiblingIndex();
+                    dropdownListPrefabClone.transform.SetSiblingIndex(titleIndex + 1);
+
+                    Debug.Log($"已成功添加下拉选项: {description}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"创建下拉列表时出错: {ex.Message}\n{ex.StackTrace}");
+                }
+            });
         }
 
         void Awake()
         {
             Debug.Log("ModConfig Mod Loaded!!!");
-
         }
 
         void OnDestroy()
         {
-
+            // 清理静态变量
+            modTabButton = null;
+            modContent = null;
+            dropdownListPrefab = null;
+            pendingConfigActions.Clear();
         }
 
         void OnEnable()
         {
-            TestAddDropDownlist();
+            Debug.Log("ModConfig Enabled");
+            // 延迟测试，确保UI已初始化
+            Invoke(nameof(DelayedTest), 1f);
         }
-
-
 
         void OnDisable()
         {
-
+            Debug.Log("ModConfig Disabled");
         }
 
+        private void DelayedTest()
+        {
+            TestAddDropDownlist();
+        }
 
         private void Update()
         {
@@ -155,7 +195,6 @@ namespace ModConfig
         private void OnMenuAwake()
         {
             Debug.Log("ModConfig: OnMenuAwake");
-
             TryCreatingModSettingTab();
         }
 
@@ -173,14 +212,6 @@ namespace ModConfig
         /// </summary>
         private void CreateModSettingTab()
         {
-            //1. 复制OptionsPanel/Tabs其中一个, 作为Tabs标签的子对象, 命名为modTab
-            //2. 复制OptionsPanel/ScrollView/Viewport/Content其中一个, 作为Content的子对象, 命名为modContent
-            //3. 清空modContent中内容
-            //4. 获取modTab的OptionsPanel_TabButton实例命名为modTab_OptionsPanel_TabButton
-            //5. modTab_OptionsPanel_TabButton.tab = (GameObject)modContent
-            //6. 查找OptionsPanel并对其(List<OptionsPanel_TabButton>)tabButtons添加modTab_OptionsPanel_TabButton
-            //7. 调用OptionsPanel的private void Setup()方法
-            //8. 至此, 已经创建完毕, 后面就是需要修改下tab名称, 以及处理modContent, 添加各个选项了
             Debug.Log("开始创建Mod设置标签页");
 
             // 获取MainMenu场景中的OptionsPanel
@@ -189,119 +220,104 @@ namespace ModConfig
 
             if (optionsPanel == null)
             {
-                Debug.Log("OptionsPanel Not Found!!!");
+                Debug.LogError("OptionsPanel Not Found!!!");
                 return;
             }
 
             Debug.Log("OptionsPanel Found");
 
-            //使用反射获取tabButtons
-            List<OptionsPanel_TabButton>? tabButtons = null;
-            do
+            // 使用反射获取tabButtons
+            List<OptionsPanel_TabButton>? tabButtons = GetTabButtons(optionsPanel);
+            if (tabButtons == null)
             {
-                tabButtons = GetTabButtons(optionsPanel);
-
-                if (tabButtons == null)
-                {
-                    Debug.Log("无法反射获取tabButtons!!!!");
-                    return;
-                }
-
-                Debug.Log("已反射获取tabButtons");
-            } while (false);
-
-            //获取OptionsPanel/Tabs游戏对象
-            //实际上就是tabButtons中任一GameObject父节点
-            //GameObject? Tabs_GameObject = tabButtons[0].gameObject.transform.parent?.gameObject;
-
-            //if (Tabs_GameObject == null) {
-            //    Debug.Log("未找到OptionsPanel/Tabs");
-            //    return;
-            //}
-
-            //复制一个tabButton的游戏对象到OptionsPanel/Tabs节点下
-            GameObject tabButtonGameObjectClone = Instantiate(tabButtons[0].gameObject, tabButtons[0].gameObject.transform.parent);
-            tabButtonGameObjectClone.name = "modTab";
-
-
-            OptionsPanel_TabButton modTabButton = tabButtonGameObjectClone.GetComponent<OptionsPanel_TabButton>();
-
-            ModBehaviour.modTabButton = modTabButton;
-
-            tabButtons.Add(modTabButton);
-
-            if (modTabButton == null)
-            {
-                Debug.Log("无法获取克隆的GameObject的OptionsPanel_TabButton组件");
+                Debug.LogError("无法反射获取tabButtons!!!!");
                 return;
             }
 
-            //这时候需要修改下tabButton的tab, 因为这个克隆的引用的还是旧的tab
-            //但是首先我们需要先克隆一个tab再说
-            //所以这里先克隆tab
-            GameObject? tab = GetTabFromOptionsPanel_TabButton(modTabButton);
+            Debug.Log("已反射获取tabButtons");
 
+            // 复制一个tabButton的游戏对象
+            GameObject tabButtonGameObjectClone = Instantiate(tabButtons[0].gameObject, tabButtons[0].gameObject.transform.parent);
+            tabButtonGameObjectClone.name = "modTab";
+
+            OptionsPanel_TabButton modTabButton = tabButtonGameObjectClone.GetComponent<OptionsPanel_TabButton>();
+            if (modTabButton == null)
+            {
+                Debug.LogError("无法获取克隆的GameObject的OptionsPanel_TabButton组件");
+                Destroy(tabButtonGameObjectClone);
+                return;
+            }
+
+            ModBehaviour.modTabButton = modTabButton;
+
+            // 获取原始tab并克隆
+            GameObject? tab = GetTabFromOptionsPanel_TabButton(modTabButton);
             if (tab == null)
             {
-                Debug.Log("无法反射获取modTabButton的tab成员");
+                Debug.LogError("无法反射获取modTabButton的tab成员");
+                Destroy(tabButtonGameObjectClone);
                 return;
             }
 
             GameObject tabClone = Instantiate(tab, tab.transform.parent);
             tabClone.name = "modContent";
-
             ModBehaviour.modContent = tabClone;
 
-            //TODO:清空tabClone里面没用的选项
-            var TODO = 1;
-
-            //这里把克隆的tab设置为tabButton的tab成员
+            // 设置克隆的tab到tabButton
             bool result = SetTabForOptionsPanel_TabButton(modTabButton, tabClone);
-
             if (!result)
             {
-                Debug.Log("反射修改tab成员失败!!");
+                Debug.LogError("反射修改tab成员失败!!");
+                Destroy(tabButtonGameObjectClone);
+                Destroy(tabClone);
                 return;
             }
 
-            //这里调用下OptionsPanel的Setup来更新之前刚插入的克隆出来的mod标签页
+            // 添加到tabButtons列表
+            tabButtons.Add(modTabButton);
+
+            // 调用Setup更新UI
             InvokeSetup(optionsPanel);
 
-            /////////////从这里开始已经成功创建了一个能够正常工作的标签页了/////////////
-            //接下来需要修改下标签页的名称, 然后清空tabClone里面没用的选项
-
-            //修改标签页名称: 获取子对象, 然后获取其TMP组件
-            //1.modTabButton.gameObject -> Label -> TMP
+            // 修改标签页名称
             TextMeshProUGUI? tabName = modTabButton.GetComponentInChildren<TextMeshProUGUI>(true);
-            //要关闭语言本地化组件
-            Destroy(modTabButton.GetComponentInChildren<TextLocalizor>(true));
-            tabName.SetText("Mod Settings");
+            if (tabName != null)
+            {
+                // 移除本地化组件
+                TextLocalizor localizor = modTabButton.GetComponentInChildren<TextLocalizor>(true);
+                if (localizor != null)
+                    Destroy(localizor);
 
-            //清空内容
-            ModBehaviour.modContent.transform.DestroyAllChildren();
+                tabName.SetText("Mod Settings");
+            }
 
-            //克隆设置分辨率的dropdownList
-            OptionsUIEntry_Dropdown resolutionDropDown = tabClone.transform.parent.GetComponentsInChildren<OptionsUIEntry_Dropdown>(true)
-                .FirstOrDefault(dropdown => dropdown.gameObject.name == "UI_Resolution");
+            // 清空内容并创建下拉列表预制体
+            if (modContent != null)
+            {
+                modContent.transform.DestroyAllChildren();
 
-            OptionsUIEntry_Dropdown resolutionDropDownClone = Instantiate(resolutionDropDown, modContent.transform);
-            GameObject dropdownListPrefab = resolutionDropDownClone.gameObject;
-            //Destroy(dropdownListPrefab.GetComponent<ResolutionOptions>());
-            dropdownListPrefab.name = "dropDownPrefab";
-            dropdownListPrefab.SetActive(false);
-            ModBehaviour.dropdownListPrefab = dropdownListPrefab;
+                // 查找分辨率下拉列表作为模板
+                OptionsUIEntry_Dropdown resolutionDropDown = tabClone.transform.parent.GetComponentsInChildren<OptionsUIEntry_Dropdown>(true)
+                    .FirstOrDefault(dropdown => dropdown.gameObject.name == "UI_Resolution");
 
-            //克隆然后修改下作为Mod标题
-            OptionsUIEntry_Dropdown resolutionDropDownClone2 = Instantiate(resolutionDropDown, modContent.transform);
-            GameObject modTitlePrefab = resolutionDropDownClone2.gameObject;
-            modTitlePrefab.name = "modTitlePrefab";
-            modTitlePrefab.SetActive(false);
-            //去掉无用元素
-            //Destroy(modTitlePrefab.transform.Find("Dropdown").gameObject);
-            ReflectionHelper.GetFieldValue<TextMeshProUGUI>(resolutionDropDownClone2, "label").SetText("模组标题模组标题");
-            ModBehaviour.modTitlePrefab = modTitlePrefab;
+                if (resolutionDropDown != null)
+                {
+                    GameObject dropdownListPrefab = Instantiate(resolutionDropDown.gameObject, modContent.transform);
+                    dropdownListPrefab.name = "dropDownPrefab";
+                    dropdownListPrefab.SetActive(false);
+                    ModBehaviour.dropdownListPrefab = dropdownListPrefab;
 
-            //TODO: 处理所有等待的配置项
+                    Debug.Log("成功创建下拉列表预制体");
+                }
+                else
+                {
+                    Debug.LogError("未找到分辨率下拉列表作为模板");
+                }
+            }
+
+            Debug.Log("Mod设置标签页创建完成");
+
+            // 立即处理等待的配置项
             ProcessPendingConfigs();
         }
 
@@ -313,12 +329,8 @@ namespace ModConfig
                 return;
             }
 
-            // 获取类型信息
             Type optionsPanelType = typeof(OptionsPanel);
-
-            // 获取私有方法 "Setup"
-            MethodInfo setupMethod = optionsPanelType.GetMethod("Setup",
-                BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo setupMethod = optionsPanelType.GetMethod("Setup", BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (setupMethod != null)
             {
@@ -329,7 +341,7 @@ namespace ModConfig
                 }
                 catch (Exception ex)
                 {
-                    Debug.LogError($"调用 Setup 方法失败: {ex.Message}");
+                    Debug.LogError($"调用 Setup 方法失败: {ex.Message}\n{ex.StackTrace}");
                 }
             }
             else
@@ -342,12 +354,8 @@ namespace ModConfig
         {
             if (optionsPanel == null) return null;
 
-            // 获取类型信息
             Type optionsPanelType = typeof(OptionsPanel);
-
-            // 获取私有字段 "tabButtons"
-            FieldInfo tabButtonsField = optionsPanelType.GetField("tabButtons",
-                BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo tabButtonsField = optionsPanelType.GetField("tabButtons", BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (tabButtonsField != null)
             {
@@ -361,12 +369,8 @@ namespace ModConfig
         {
             if (tabButton == null) return null;
 
-            // 获取类型信息
             Type OptionsPanel_TabButtonType = typeof(OptionsPanel_TabButton);
-
-            // 获取私有字段 "tab"
-            FieldInfo tabField = OptionsPanel_TabButtonType.GetField("tab",
-                BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo tabField = OptionsPanel_TabButtonType.GetField("tab", BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (tabField != null)
             {
@@ -380,12 +384,8 @@ namespace ModConfig
         {
             if (tabButton == null) return false;
 
-            // 获取类型信息
             Type optionsPanelTabButtonType = typeof(OptionsPanel_TabButton);
-
-            // 获取私有字段 "tab"
-            FieldInfo tabField = optionsPanelTabButtonType.GetField("tab",
-                BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo tabField = optionsPanelTabButtonType.GetField("tab", BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (tabField != null)
             {
@@ -407,28 +407,32 @@ namespace ModConfig
 
         private void TestAddDropDownlist()
         {
+            if (modContent == null)
+            {
+                Debug.LogWarning("modContent 尚未初始化，延迟测试添加下拉列表");
+                return;
+            }
+
             SortedDictionary<string, object> options = new SortedDictionary<string, object>()
             {
-                { "选项1", 1},
-                { "选项2", 2},
-                { "选项3", 3},
-                { "选项4", 4},
+                { "选项1", 1 },
+                { "选项2", 2 },
+                { "选项3", 3 },
+                { "选项4", 4 },
             };
 
             AddDropdownList("测试模组", "test", "测试选项1", options, typeof(int), 0);
-
-            //AddDropdownList("测试模组", "test", "测试选项2", options, typeof(int), 0);
         }
 
         override protected void OnAfterSetup()
         {
             Debug.Log("已添加MainMenuAwake事件");
-            //添加事件
             MainMenu.OnMainMenuAwake += OnMenuAwake;
 
-            //这里是防止该mod是后启用的, 此时MainMenu的Awake事件已经被触发过, 所以需要单独判断下
+            // 检查是否已经存在MainMenu
             if (FindAnyObjectByType(typeof(MainMenu)) != null)
             {
+                Debug.Log("MainMenu 已存在，尝试创建设置标签页");
                 TryCreatingModSettingTab();
             }
         }
