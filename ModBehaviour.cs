@@ -22,6 +22,8 @@ namespace ModConfig
         private static GameObject? modContent = null;
 
         //从游戏里克隆一个设置分辨率的游戏对象
+        private static GameObject? modTitlePrefab;
+        //从游戏里克隆一个设置分辨率的游戏对象
         private static GameObject? dropdownListPrefab;
 
         //待添加到modContent子节点的所有操作
@@ -68,6 +70,7 @@ namespace ModConfig
         /// <summary>
         /// 下拉选项, 类似分辨率选择
         /// 
+        /// modName: mod名称, 用于分类
         /// key: 要存入Unity的pref的key
         /// description: 选项名称
         /// options: key为显示的字符串, value表示该选项对应的要使用的值
@@ -75,7 +78,7 @@ namespace ModConfig
         /// 例: 添加分辨率选项AddDropdownList("分辨率", {"1980, 1080":0, "1280, 720":1});
         /// </summary>
         /// <param name="options"></param>
-        public static void AddDropdownList(string key, string description, SortedDictionary<string, object> options, Type valueType, object defaultValue)
+        public static void AddDropdownList(string modName, string key, string description, SortedDictionary<string, object> options, Type valueType, object defaultValue)
         {
             //TODO: 添加下拉列表
             AddConfig(() => {
@@ -95,7 +98,26 @@ namespace ModConfig
                 ReflectionHelper.SetFieldValue(dropdownUIEntry, "provider",
                     provider);
 
-                dropdownListPrefabClone.transform.SetParent(modContent.transform);
+                //这里要添加到以模组名称为名的GameObject下, 然后这个GameObject是modContent的子节点
+                //没有则创建
+                Transform modTitleTransform = null;
+                if (modContent.transform.Find(modName) == null)
+                {
+                    GameObject modNameTitleClone = Instantiate(ModBehaviour.modTitlePrefab, modContent.transform);
+                    modNameTitleClone.SetActive(true);
+                    modNameTitleClone.name = modName; // 重要：设置名字用于后续查找
+                    modNameTitleClone.transform.Find("Label").GetComponent<TextMeshProUGUI>().SetText(modName);
+                    modTitleTransform = modNameTitleClone.transform;
+                }
+                else
+                {
+                    modTitleTransform = modContent.transform.Find(modName);
+                }
+
+                dropdownListPrefabClone.transform.parent = modContent.transform;
+                // 找到mod标题的索引，然后设置dropdown在它后面
+                int titleIndex = modTitleTransform.GetSiblingIndex();
+                dropdownListPrefabClone.transform.SetSiblingIndex(titleIndex + 1);
 
                 Debug.Log("已添加下拉选项config:" + description);
             });            
@@ -258,16 +280,26 @@ namespace ModConfig
             //清空内容
             ModBehaviour.modContent.transform.DestroyAllChildren();
 
-            //TODO:克隆设置分辨率的dropdownList
+            //克隆设置分辨率的dropdownList
             OptionsUIEntry_Dropdown resolutionDropDown = tabClone.transform.parent.GetComponentsInChildren<OptionsUIEntry_Dropdown>(true)
                 .FirstOrDefault(dropdown => dropdown.gameObject.name == "UI_Resolution");
 
             OptionsUIEntry_Dropdown resolutionDropDownClone = Instantiate(resolutionDropDown, modContent.transform);
+            GameObject dropdownListPrefab = resolutionDropDownClone.gameObject;
+            //Destroy(dropdownListPrefab.GetComponent<ResolutionOptions>());
+            dropdownListPrefab.name = "dropDownPrefab";
+            dropdownListPrefab.SetActive(false);
+            ModBehaviour.dropdownListPrefab = dropdownListPrefab;
 
-            resolutionDropDownClone.gameObject.name = "dropDownPrefab";
-            resolutionDropDownClone.gameObject.SetActive(false);
-
-            ModBehaviour.dropdownListPrefab = resolutionDropDownClone.gameObject;
+            //克隆然后修改下作为Mod标题
+            OptionsUIEntry_Dropdown resolutionDropDownClone2 = Instantiate(resolutionDropDown, modContent.transform);
+            GameObject modTitlePrefab = resolutionDropDownClone2.gameObject;
+            modTitlePrefab.name = "modTitlePrefab";
+            modTitlePrefab.SetActive(false);
+            //去掉无用元素
+            //Destroy(modTitlePrefab.transform.Find("Dropdown").gameObject);
+            ReflectionHelper.GetFieldValue<TextMeshProUGUI>(resolutionDropDownClone2, "label").SetText("模组标题模组标题");
+            ModBehaviour.modTitlePrefab = modTitlePrefab;
 
             //TODO: 处理所有等待的配置项
             ProcessPendingConfigs();
@@ -375,7 +407,6 @@ namespace ModConfig
 
         private void TestAddDropDownlist()
         {
-            string description = "测试";
             SortedDictionary<string, object> options = new SortedDictionary<string, object>()
             {
                 { "选项1", 1},
@@ -384,7 +415,9 @@ namespace ModConfig
                 { "选项4", 4},
             };
 
-            AddDropdownList("test", description, options, typeof(int), 0);
+            AddDropdownList("测试模组", "test", "测试选项1", options, typeof(int), 0);
+
+            //AddDropdownList("测试模组", "test", "测试选项2", options, typeof(int), 0);
         }
 
         override protected void OnAfterSetup()
