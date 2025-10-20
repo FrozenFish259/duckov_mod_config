@@ -277,12 +277,12 @@ namespace ModConfig
 
         public static void AddOnOptionsChangedDelegate(Action<string> action)
         {
-            OptionsManager_Mod.OnOptionsChanged += action;
+            OptionsManager_Mod.OnConfigSaved += action;
         }
 
         public static void RemoveOnOptionsChangedDelegate(Action<string> action)
         {
-            OptionsManager_Mod.OnOptionsChanged -= action;
+            OptionsManager_Mod.OnConfigSaved -= action;
         }
 
         void Awake()

@@ -9,7 +9,7 @@ namespace ModConfig
     {
         public const string FileName = "ModConfig.ES3";
 
-        private static ES3Settings _saveSettings;
+        private static ES3Settings? _saveSettings = null;
 
         private static string Folder => SavesSystem.SavesFolder;
 
@@ -30,7 +30,7 @@ namespace ModConfig
             }
         }
 
-        public static event Action<string> OnOptionsChanged;
+        public static event Action<string> OnConfigSaved;
 
         public static void Save<T>(string key, T obj)
         {
@@ -42,7 +42,7 @@ namespace ModConfig
             try
             {
                 ES3.Save(key, obj, SaveSettings);
-                OptionsManager_Mod.OnOptionsChanged?.Invoke(key);
+                OptionsManager_Mod.OnConfigSaved?.Invoke(key);
                 ES3.CreateBackup(SaveSettings);
             }
             catch (Exception exception)
