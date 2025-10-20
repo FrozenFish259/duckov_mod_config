@@ -51,7 +51,7 @@ namespace ModConfig
         {
             if (modTabButton == null || modContent == null)
             {
-                Debug.Log("modTabButton 或 modContent 尚未初始化，跳过处理配置项");
+                Debug.Log("modTabButton 或 modContent 尚未初始化，暂不处理配置项");
                 return;
             }
 
@@ -159,6 +159,7 @@ namespace ModConfig
 
         void Awake()
         {
+            TestAddDropDownlist();
             Debug.Log("ModConfig Mod Loaded!!!");
         }
 
@@ -174,18 +175,11 @@ namespace ModConfig
         void OnEnable()
         {
             Debug.Log("ModConfig Enabled");
-            // 延迟测试，确保UI已初始化
-            Invoke(nameof(DelayedTest), 1f);
         }
 
         void OnDisable()
         {
             Debug.Log("ModConfig Disabled");
-        }
-
-        private void DelayedTest()
-        {
-            TestAddDropDownlist();
         }
 
         private void Update()
@@ -408,11 +402,11 @@ namespace ModConfig
 
         private void TestAddDropDownlist()
         {
-            if (modContent == null)
-            {
-                Debug.LogWarning("modContent 尚未初始化，延迟测试添加下拉列表");
-                return;
-            }
+            //if (modContent == null)
+            //{
+            //    Debug.LogWarning("modContent 尚未初始化，延迟测试添加下拉列表");
+            //    return;
+            //}
 
             SortedDictionary<string, object> options = new SortedDictionary<string, object>()
             {
