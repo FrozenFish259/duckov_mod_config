@@ -21,6 +21,9 @@ namespace ModConfig
 
         //从游戏里克隆一个设置分辨率的游戏对象
         private static GameObject? dropdownListPrefab;
+        //从游戏里克隆一个鼠标灵敏度的游戏对象
+        //OptionsUIEntry_Slider
+        private static GameObject? inputWithSliderPrefab;
 
         //待添加到modContent子节点的所有操作
         private static Queue<Action> pendingConfigActions = new Queue<Action>();
@@ -151,6 +154,7 @@ namespace ModConfig
 
                     int titleIndex = modTitleTransform.GetSiblingIndex();
                     dropdownListPrefabClone.transform.SetSiblingIndex(titleIndex + 1);
+                    dropdownListPrefabClone.name = "UI_" + modName + "_" + key;
 
                     Debug.Log($"已成功添加下拉选项: {description}");
                 }
@@ -172,6 +176,79 @@ namespace ModConfig
         public static void AddInputWithSlider(string modName, string key, string description, Type valueType, Vector2? sliderRange = null)
         {
             //TODO: 待实现
+            AddConfig(() => {
+                // 安全检查
+                if (inputWithSliderPrefab == null)
+                {
+                    Debug.LogError("inputWithSliderPrefab 为 null，无法创建滑条");
+                    return;
+                }
+
+                if (dropdownListPrefab == null)
+                {
+                    Debug.LogError("dropdownListPrefab 为 null，无法创建滑条");
+                    return;
+                }
+
+                if (modContent == null)
+                {
+                    Debug.LogError("modContent 为 null，无法添加下拉列表");
+                    return;
+                }
+
+                try
+                {
+                    GameObject inputWithSliderPrefabClone = Instantiate(ModBehaviour.inputWithSliderPrefab);
+                    inputWithSliderPrefabClone.SetActive(true);
+
+                    // 设置描述
+                    OptionsUIEntry_Slider_Mod uIEntry_Slider_Mod = inputWithSliderPrefabClone.GetComponent<OptionsUIEntry_Slider_Mod>();
+                    if (uIEntry_Slider_Mod == null)
+                    {
+                        Debug.LogError("无法获取 OptionsUIEntry_Slider_Mod 组件");
+                        Destroy(inputWithSliderPrefabClone);
+                        return;
+                    }
+
+                    //初始化数据
+                    uIEntry_Slider_Mod.Init(key, description, valueType, sliderRange);
+
+                    // 创建或查找mod标题
+                    Transform modTitleTransform = modContent.transform.Find(modName);
+                    if (modTitleTransform == null)
+                    {
+                        GameObject modNameTitleClone = Instantiate(ModBehaviour.dropdownListPrefab, modContent.transform);
+                        modNameTitleClone.name = modName;
+                        modNameTitleClone.transform.DestroyAllChildren();
+
+                        // 创建标题文本
+                        GameObject titleTextObject = new GameObject("TitleText");
+                        titleTextObject.transform.SetParent(modNameTitleClone.transform);
+
+                        TextMeshProUGUI titleText = titleTextObject.AddComponent<TextMeshProUGUI>();
+                        titleText.SetText(modName);
+                        titleText.margin = new Vector4(10, 10, 10, 10);
+
+                        modNameTitleClone.SetActive(true);
+
+                        modTitleTransform = modNameTitleClone.transform;
+                    }
+
+                    // 设置父级和顺序
+                    inputWithSliderPrefabClone.transform.SetParent(modContent.transform, false);
+
+                    int titleIndex = modTitleTransform.GetSiblingIndex();
+                    inputWithSliderPrefabClone.transform.SetSiblingIndex(titleIndex + 1);
+                    inputWithSliderPrefabClone.name = "UI_" + modName + "_" + key;
+
+
+                    Debug.Log($"已成功添加滑条选项: {description}");
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"创建滑条时出错: {ex.Message}\n{ex.StackTrace}");
+                }
+            });
         }
 
         void Awake()
@@ -221,6 +298,14 @@ namespace ModConfig
 
         /// <summary>
         /// 在设置菜单中标签页追加ModSetting标签
+        /// 1. 复制OptionsPanel/Tabs其中一个, 作为Tabs标签的子对象, 命名为modTab
+        /// 2. 复制OptionsPanel/ScrollView/Viewport/Content其中一个, 作为Content的子对象, 命名为modContent
+        /// 3. 清空modContent中内容
+        /// 4. 获取modTab的OptionsPanel_TabButton实例命名为modTab_OptionsPanel_TabButton
+        /// 5. modTab_OptionsPanel_TabButton.tab = (GameObject)modContent
+        /// 6. 查找OptionsPanel并对其(List<OptionsPanel_TabButton>)tabButtons添加modTab_OptionsPanel_TabButton
+        /// 7. 调用OptionsPanel的private void Setup()方法
+        /// 8. 至此, 已经创建完毕, 后面就是需要修改下tab名称, 以及处理modContent, 添加各种选项了
         /// </summary>
         private void CreateModSettingTab()
         {
@@ -327,15 +412,59 @@ namespace ModConfig
                 }
             }
 
+            MakeInputWithSliderPrefab();
+
             Debug.Log("Mod设置标签页创建完成");
 
             // 立即处理等待的配置项
             ProcessPendingConfigs();
         }
 
+        private void MakeInputWithSliderPrefab()
+        {
+            if (modContent == null)
+            {
+                Debug.LogError("modContent为空! MakeInputWithSliderPrefab failed!");
+            }
+      
+            GameObject? UI_MouseSensitivity = FindObjectsOfType<OptionsUIEntry_Slider>().First(component => component.gameObject.name == "UI_MouseSensitivity")?.gameObject;
+
+            if (UI_MouseSensitivity == null)
+            {
+                Debug.LogError("无法找到鼠标灵敏度设置选项, 将无法使用InputWithSlider类型config");
+                return;
+            }
+
+            GameObject UI_MouseSensitivity_Clone = Instantiate(UI_MouseSensitivity);
+            UI_MouseSensitivity_Clone.SetActive(true);
+            DontDestroyOnLoad(UI_MouseSensitivity_Clone);
+
+            OptionsUIEntry_Slider optionsUIEntry_Slider = UI_MouseSensitivity_Clone.GetComponent<OptionsUIEntry_Slider>();
+            //获取这三个引用
+            //private TextMeshProUGUI label;
+            //private Slider slider;
+            //private TMP_InputField valueField;
+            var label = ReflectionHelper.GetFieldValue<TextMeshProUGUI>(optionsUIEntry_Slider, "label");
+            var slider = ReflectionHelper.GetFieldValue<UnityEngine.UI.Slider>(optionsUIEntry_Slider, "slider");
+            var valueField = ReflectionHelper.GetFieldValue<TMP_InputField>(optionsUIEntry_Slider, "valueField");
+
+            Destroy(optionsUIEntry_Slider);
+
+            OptionsUIEntry_Slider_Mod UIEntry_Slider_Mod = UI_MouseSensitivity_Clone.AddComponent<OptionsUIEntry_Slider_Mod>();
+
+            //将旧的3个组件加到新的OptionsUIEntry_Slider_Mod
+            UIEntry_Slider_Mod.label = label;
+            UIEntry_Slider_Mod.slider = slider;
+            UIEntry_Slider_Mod.valueField = valueField;
+
+            UIEntry_Slider_Mod.label.SetText("OptionsUIEntry_Slider_Mod");
+
+            ModBehaviour.inputWithSliderPrefab = UI_MouseSensitivity_Clone;
+        }
+
         private void TestAddDropDownlist()
         {
-            SortedDictionary<string, object> options = new SortedDictionary<string, object>()
+            SortedDictionary<string, object> dropDownOptions = new SortedDictionary<string, object>()
             {
                 { "选项1", 1 },
                 { "选项2", 2 },
@@ -343,11 +472,12 @@ namespace ModConfig
                 { "选项4", 4 },
             };
 
-            AddDropdownList("模组A", "testA1", "测试选项1", options, typeof(int), 0);
-            AddDropdownList("模组B", "testB1", "测试选项1", options, typeof(int), 0);
-            AddDropdownList("模组A", "testA2", "测试选项2", options, typeof(int), 0);
-            AddDropdownList("模组A", "testA3", "测试选项3", options, typeof(int), 0);
-            AddDropdownList("模组B", "testB2", "测试选项2", options, typeof(int), 0);
+            AddDropdownList("模组A", "testA1", "测试选项1", dropDownOptions, typeof(int), 0);
+            AddDropdownList("模组B", "testB1", "测试选项1", dropDownOptions, typeof(int), 0);
+            AddDropdownList("模组A", "testA2", "测试选项2", dropDownOptions, typeof(int), 0);
+            AddDropdownList("模组A", "testA3", "测试选项3", dropDownOptions, typeof(int), 0);
+            AddDropdownList("模组B", "testB2", "测试选项2", dropDownOptions, typeof(int), 0);
+            AddInputWithSlider("模组C", "testSlider1", "测试滑条float", typeof(float), new Vector2( 0.0f, 1.0f));
         }
 
         override protected void OnAfterSetup()
