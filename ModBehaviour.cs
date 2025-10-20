@@ -77,6 +77,12 @@ namespace ModConfig
         /// <summary>
         /// 下拉选项, 类似分辨率选择
         /// </summary>
+        /// <param name="modName">模组名称</param>
+        /// <param name="key"></param>
+        /// <param name="description"></param>
+        /// <param name="options"></param>
+        /// <param name="valueType"></param>
+        /// <param name="defaultValue"></param>
         public static void AddDropdownList(string modName, string key, string description, SortedDictionary<string, object> options, Type valueType, object defaultValue)
         {
             AddConfig(() => {
@@ -153,6 +159,19 @@ namespace ModConfig
                     Debug.LogError($"创建下拉列表时出错: {ex.Message}\n{ex.StackTrace}");
                 }
             });
+        }
+
+        /// <summary>
+        /// 添加一个输入框, 可选是否带滑条
+        /// </summary>
+        /// <param name="modName">模组名称</param>
+        /// <param name="key"></param>
+        /// <param name="description"></param>
+        /// <param name="valueType"></param>
+        /// <param name="sliderRange">滑条范围, 如果不需要则填null</param>
+        public static void AddInputWithSlider(string modName, string key, string description, Type valueType, Vector2? sliderRange = null)
+        {
+            //TODO: 待实现
         }
 
         void Awake()
