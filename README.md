@@ -9,6 +9,12 @@
 1. 从[Github Project](https://github.com/FrozenFish259/duckov_mod_config)下载并拷贝 `ModConfigApi.cs` 至你的项目中, 方便调用 `ModConfig` 函数
 2. 务必在配置读写相关逻辑前, 务必调用一次`ModConfigAPI.Initialize()`以验证是否能够正常与 `ModConfig` 通信
 
+### 支持的数据类型
+* bool
+* int
+* float
+* string
+
 ### 注意事项
 * 配置项数值是通过 `OptionsManager.Load<T>(string key, T defaultV)` 读取的
 * `ModConfig`实现逻辑较复杂, 不排除未来游戏某次更新后会导致其失效并需要重新维护的可能性, 因为有了下面这条注意事项
@@ -32,6 +38,12 @@
 ### Steps
 1. Download `ModConfigApi.cs` from [Github Project](https://github.com/FrozenFish259/duckov_mod_config) and copy it to your project for calling `ModConfig` functions
 2. Before configuration read/write logic, be sure to call `ModConfigAPI.Initialize()` once to verify normal communication with `ModConfig`
+
+### Supported Data Types
+* bool
+* int
+* float
+* string
 
 ### Important Notes
 * Configuration values are read through `OptionsManager.Load<T>(string key, T defaultV)`
