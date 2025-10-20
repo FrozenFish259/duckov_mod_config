@@ -295,9 +295,6 @@ namespace ModConfig
         {
             //ExampleUsingModConfig.OnDeactivate();
             // 清理静态变量
-            modTabButton = null;
-            modContent = null;
-            dropdownListPrefab = null;
             pendingConfigActions.Clear();
         }
 
