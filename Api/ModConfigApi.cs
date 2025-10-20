@@ -18,6 +18,7 @@ public static class ModConfigAPI
     private static string TAG = $"ModConfig_v{ModConfigVersion}";
 
     private static Type modBehaviourType;
+    private static Type optionsManagerType;
     public static bool isInitialized = false;
     private static bool versionChecked = false;
     private static bool isVersionCompatible = false;
@@ -87,6 +88,15 @@ public static class ModConfigAPI
             if (modBehaviourType == null)
             {
                 Debug.LogWarning($"[{TAG}] ModConfig.ModBehaviour 类型未找到，ModConfig 可能未加载");
+                return false;
+            }
+
+            // 获取 OptionsManager_Mod 类型
+            // Get OptionsManager_Mod type
+            optionsManagerType = FindTypeInAssemblies("ModConfig.OptionsManager_Mod");
+            if (optionsManagerType == null)
+            {
+                Debug.LogWarning($"[{TAG}] ModConfig.OptionsManager_Mod 类型未找到");
                 return false;
             }
 
@@ -250,6 +260,8 @@ public static class ModConfigAPI
     /// </summary>
     public static bool SafeAddDropdownList(string modName, string key, string description, System.Collections.Generic.SortedDictionary<string, object> options, Type valueType, object defaultValue)
     {
+        key = $"{modName}_{key}";
+
         if (!Initialize())
             return false;
 
@@ -274,6 +286,8 @@ public static class ModConfigAPI
     /// </summary>
     public static bool SafeAddInputWithSlider(string modName, string key, string description, Type valueType, object defaultValue, UnityEngine.Vector2? sliderRange = null)
     {
+        key = $"{modName}_{key}";
+
         if (!Initialize())
             return false;
 
@@ -305,6 +319,8 @@ public static class ModConfigAPI
     /// </summary>
     public static bool SafeAddBoolDropdownList(string modName, string key, string description, bool defaultValue)
     {
+        key = $"{modName}_{key}";
+
         if (!Initialize())
             return false;
 
@@ -319,6 +335,94 @@ public static class ModConfigAPI
         catch (Exception ex)
         {
             Debug.LogError($"[{TAG}] 添加布尔下拉列表失败 {modName}.{key}: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 安全地加载配置值
+    /// Safely load configuration value
+    /// </summary>
+    /// <typeparam name="T">值的类型</typeparam>
+    /// <param name="key">配置键</param>
+    /// <param name="defaultValue">默认值</param>
+    /// <returns>加载的值或默认值</returns>
+    public static T SafeLoad<T>(string mod_name, string key, T defaultValue = default(T))
+    {
+        key = $"{mod_name}_{key}";
+
+        if (!Initialize())
+            return defaultValue;
+
+        if (string.IsNullOrEmpty(key))
+        {
+            Debug.LogWarning($"[{TAG}] 配置键不能为空");
+            return defaultValue;
+        }
+
+        try
+        {
+            MethodInfo loadMethod = optionsManagerType.GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+            if (loadMethod == null)
+            {
+                Debug.LogError($"[{TAG}] 未找到 OptionsManager_Mod.Load 方法");
+                return defaultValue;
+            }
+
+            // 获取泛型方法
+            MethodInfo genericLoadMethod = loadMethod.MakeGenericMethod(typeof(T));
+            object result = genericLoadMethod.Invoke(null, new object[] { key, defaultValue });
+
+            Debug.Log($"[{TAG}] 成功加载配置: {key} = {result}");
+            return (T)result;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[{TAG}] 加载配置失败 {key}: {ex.Message}");
+            return defaultValue;
+        }
+    }
+
+    /// <summary>
+    /// 安全地保存配置值
+    /// Safely save configuration value
+    /// </summary>
+    /// <typeparam name="T">值的类型</typeparam>
+    /// <param name="key">配置键</param>
+    /// <param name="value">要保存的值</param>
+    /// <returns>是否保存成功</returns>
+    public static bool SafeSave<T>(string mod_name, string key, T value)
+    {
+        key = $"{mod_name}_{key}";
+
+        if (!Initialize())
+            return false;
+
+        if (string.IsNullOrEmpty(key))
+        {
+            Debug.LogWarning($"[{TAG}] 配置键不能为空");
+            return false;
+        }
+
+        try
+        {
+            MethodInfo saveMethod = optionsManagerType.GetMethod("Save", BindingFlags.Public | BindingFlags.Static);
+            if (saveMethod == null)
+            {
+                Debug.LogError($"[{TAG}] 未找到 OptionsManager_Mod.Save 方法");
+                return false;
+            }
+
+            // 获取泛型方法
+            MethodInfo genericSaveMethod = saveMethod.MakeGenericMethod(typeof(T));
+            genericSaveMethod.Invoke(null, new object[] { key, value });
+
+            Debug.Log($"[{TAG}] 成功保存配置: {key} = {value}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[{TAG}] 保存配置失败 {key}: {ex.Message}");
             return false;
         }
     }
