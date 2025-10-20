@@ -343,11 +343,11 @@ namespace ModConfig
                 { "选项4", 4 },
             };
 
-            AddDropdownList("模组A", "test", "测试选项1", options, typeof(int), 0);
-            AddDropdownList("模组B", "test", "测试选项1", options, typeof(int), 0);
-            AddDropdownList("模组A", "test", "测试选项2", options, typeof(int), 0);
-            AddDropdownList("模组A", "test", "测试选项3", options, typeof(int), 0);
-            AddDropdownList("模组B", "test", "测试选项2", options, typeof(int), 0);
+            AddDropdownList("模组A", "testA1", "测试选项1", options, typeof(int), 0);
+            AddDropdownList("模组B", "testB1", "测试选项1", options, typeof(int), 0);
+            AddDropdownList("模组A", "testA2", "测试选项2", options, typeof(int), 0);
+            AddDropdownList("模组A", "testA3", "测试选项3", options, typeof(int), 0);
+            AddDropdownList("模组B", "testB2", "测试选项2", options, typeof(int), 0);
         }
 
         override protected void OnAfterSetup()
