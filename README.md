@@ -14,6 +14,7 @@
 ## 步骤
 1. 从[Github Project](https://github.com/FrozenFish259/duckov_mod_config)下载并拷贝 `ModConfigApi.cs` 至你的项目中, 方便调用 `ModConfig` 函数
 2. 务必在配置读写相关逻辑前, 务必调用一次`ModConfigAPI.Initialize()`以验证是否能够正常与 `ModConfig` 通信
+3. 参考我的[演示项目](https://github.com/FrozenFish259/duckov_mod_config_example)
 
 ## 支持的数据类型
 * bool
@@ -30,8 +31,8 @@
 在上传你的mod后, 在创意工坊页面中点击 `添加/移除必需物品` 后添加对 `ModConfig` 的依赖即可
 
 ## 源码参考
-[Github项目](https://github.com/FrozenFish259/duckov_mod_config)  
-
+[Github源码](https://github.com/FrozenFish259/duckov_mod_config)  
+[Github演示项目](https://github.com/FrozenFish259/duckov_mod_config_example)
 
 # English Documentation
 
@@ -48,6 +49,7 @@ Delete following file if you wanna reset ModConfig's mod settings
 ## Steps
 1. Download `ModConfigApi.cs` from [Github Project](https://github.com/FrozenFish259/duckov_mod_config) and copy it to your project for calling `ModConfig` functions
 2. Before configuration read/write logic, be sure to call `ModConfigAPI.Initialize()` once to verify normal communication with `ModConfig`
+3. Check out my [example project](https://github.com/FrozenFish259/duckov_mod_config_example)
 
 ## Supported Data Types
 * bool
@@ -64,4 +66,5 @@ Delete following file if you wanna reset ModConfig's mod settings
 After uploading your mod, go to workshop item page and click `Add/Remove Required Items` , add `ModConfig` as its dependency
 
 ## Source Code Reference
-[Github Project](https://github.com/FrozenFish259/duckov_mod_config)
+[Github Source](https://github.com/FrozenFish259/duckov_mod_config)
+[Github Example Project](https://github.com/FrozenFish259/duckov_mod_config_example)

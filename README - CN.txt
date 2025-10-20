@@ -18,6 +18,7 @@
 [olist]
 [*]从[url=https://github.com/FrozenFish259/duckov_mod_config]Github Project[/url]下载并拷贝 [i]ModConfigApi.cs[/i] 至你的项目中, 方便调用 [i]ModConfig[/i] 函数
 [*]务必在配置读写相关逻辑前, 务必调用一次[i]ModConfigAPI.Initialize()[/i]以验证是否能够正常与 [i]ModConfig[/i] 通信
+[*]参考我的[url=https://github.com/FrozenFish259/duckov_mod_config_example]演示项目[/url]
 [/olist]
 
 [h2]支持的数据类型[/h2]

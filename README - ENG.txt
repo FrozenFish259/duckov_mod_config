@@ -18,6 +18,7 @@ Delete following file if you wanna reset ModConfig's mod settings
 [olist]
 [*]Download [i]ModConfigApi.cs[/i] from [url=https://github.com/FrozenFish259/duckov_mod_config]Github Project[/url] and copy it to your project for calling [i]ModConfig[/i] functions
 [*]Before configuration read/write logic, be sure to call [i]ModConfigAPI.Initialize()[/i] once to verify normal communication with [i]ModConfig[/i]
+[*]Check out my [url=https://github.com/FrozenFish259/duckov_mod_config_example]example project[/url]
 [/olist]
 
 [h2]Supported Data Types[/h2]
