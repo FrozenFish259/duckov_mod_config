@@ -30,18 +30,6 @@ namespace ModConfig
             }
         }
 
-        public static float MouseSensitivity
-        {
-            get
-            {
-                return Load("MouseSensitivity", 10f);
-            }
-            set
-            {
-                Save("MouseSensitivity", value);
-            }
-        }
-
         public static event Action<string> OnOptionsChanged;
 
         public static void Save<T>(string key, T obj)
