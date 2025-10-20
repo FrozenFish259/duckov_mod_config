@@ -317,7 +317,13 @@ namespace ModConfig
                 valueField.contentType = TMP_InputField.ContentType.Standard;
             }
 
-                this.key = key;
+            if (this.slider == null)
+            {
+                Debug.LogError("slider为空!!");
+                return;
+            }
+
+            this.key = key;
             this.defaultValue = defaultValue;
             this.valueType = valueType;
             this.sliderRange = sliderRange;
@@ -336,6 +342,10 @@ namespace ModConfig
                     }
                 }
             }
+
+
+            this.slider.minValue = float.MinValue;
+            this.slider.maxValue = float.MaxValue;
 
             // 设置slider的范围
             if (sliderRange.HasValue && this.slider != null)
@@ -362,7 +372,6 @@ namespace ModConfig
             }
 
             initDone = true;
-
             
             // 初始化显示
             RefreshValues();

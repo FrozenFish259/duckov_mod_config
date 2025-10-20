@@ -24,10 +24,12 @@ class ExampleUsingModConfig
     //bool
     private static bool win = false;
 
+    private static string name = "me";
+
     //dropdown list
     //"None", "Red", "Blue", "Green"
     // 0, 1, 2, 3
-    private string color = "None";
+    private static string color = "None";
 
     public static void OnActive()
     {
@@ -42,7 +44,7 @@ class ExampleUsingModConfig
         //no range, no slider
         //pass null to sliderRange so it's disabled
         ModConfigAPI.SafeAddInputWithSlider(
-            MOD_NAME, $"{MOD_NAME}_{nameof(posX)}", "position X", typeof(int), posX, null);
+                    MOD_NAME, $"{MOD_NAME}_{nameof(posX)}", "position X", typeof(int), posX, null);
 
         //ranged with slider
         ModConfigAPI.SafeAddInputWithSlider(
@@ -53,6 +55,10 @@ class ExampleUsingModConfig
 
         ModConfigAPI.SafeAddInputWithSlider(
                            MOD_NAME, $"{MOD_NAME}_{nameof(time)}", "time left", typeof(float), time, new Vector2(0.0f, 100.0f));
+
+        //only text, no slider
+        ModConfigAPI.SafeAddInputWithSlider(
+                    MOD_NAME, $"{MOD_NAME}_{nameof(name)}", "My name", typeof(string), name, null);
 
         //bool dropdown
         ModConfigAPI.SafeAddBoolDropdownList(
