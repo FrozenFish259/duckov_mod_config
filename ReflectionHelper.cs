@@ -11,23 +11,19 @@ namespace Utilities
     {
         private const string TAG = "ReflectionHelper";
 
+        #region 实例成员方法
+
         /// <summary>
-        /// 安全获取字段值
+        /// 安全获取实例字段值
         /// </summary>
-        /// <typeparam name="T">返回类型</typeparam>
-        /// <param name="obj">目标对象</param>
-        /// <param name="fieldName">字段名</param>
-        /// <param name="defaultValue">默认值</param>
-        /// <param name="bindingFlags">绑定标志</param>
-        /// <returns>字段值或默认值</returns>
-        public static T GetFieldValue<T>(object obj, string fieldName, T defaultValue = default(T),
-            BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        public static T GetInstanceFieldValue<T>(object obj, string fieldName, T defaultValue = default(T),
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
         {
             try
             {
                 if (obj == null)
                 {
-                    Debug.LogWarning($"[{TAG}] 获取字段 '{fieldName}' 失败：目标对象为null");
+                    Debug.LogWarning($"[{TAG}] 获取实例字段 '{fieldName}' 失败：目标对象为null");
                     return defaultValue;
                 }
 
@@ -36,7 +32,13 @@ namespace Utilities
 
                 if (field == null)
                 {
-                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到字段 '{fieldName}'");
+                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到实例字段 '{fieldName}'");
+                    return defaultValue;
+                }
+
+                if (field.IsStatic)
+                {
+                    Debug.LogWarning($"[{TAG}] 字段 '{type.Name}.{fieldName}' 是静态字段，请使用 GetStaticFieldValue 方法");
                     return defaultValue;
                 }
 
@@ -44,38 +46,33 @@ namespace Utilities
 
                 if (value is T result)
                 {
-                    Debug.Log($"[{TAG}] 成功获取字段 '{type.Name}.{fieldName}' = {result}");
+                    Debug.Log($"[{TAG}] 成功获取实例字段 '{type.Name}.{fieldName}' = {result}");
                     return result;
                 }
                 else
                 {
-                    Debug.LogWarning($"[{TAG}] 字段 '{type.Name}.{fieldName}' 类型不匹配。期望: {typeof(T).Name}, 实际: {value?.GetType().Name ?? "null"}");
+                    Debug.LogWarning($"[{TAG}] 实例字段 '{type.Name}.{fieldName}' 类型不匹配。期望: {typeof(T).Name}, 实际: {value?.GetType().Name ?? "null"}");
                     return defaultValue;
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[{TAG}] 获取字段 '{fieldName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
+                Debug.LogError($"[{TAG}] 获取实例字段 '{fieldName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
                 return defaultValue;
             }
         }
 
         /// <summary>
-        /// 安全设置字段值
+        /// 安全设置实例字段值
         /// </summary>
-        /// <param name="obj">目标对象</param>
-        /// <param name="fieldName">字段名</param>
-        /// <param name="value">要设置的值</param>
-        /// <param name="bindingFlags">绑定标志</param>
-        /// <returns>是否设置成功</returns>
-        public static bool SetFieldValue(object obj, string fieldName, object value,
-            BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        public static bool SetInstanceFieldValue(object obj, string fieldName, object value,
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
         {
             try
             {
                 if (obj == null)
                 {
-                    Debug.LogWarning($"[{TAG}] 设置字段 '{fieldName}' 失败：目标对象为null");
+                    Debug.LogWarning($"[{TAG}] 设置实例字段 '{fieldName}' 失败：目标对象为null");
                     return false;
                 }
 
@@ -84,7 +81,20 @@ namespace Utilities
 
                 if (field == null)
                 {
-                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到字段 '{fieldName}'");
+                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到实例字段 '{fieldName}'");
+                    return false;
+                }
+
+                if (field.IsStatic)
+                {
+                    Debug.LogWarning($"[{TAG}] 字段 '{type.Name}.{fieldName}' 是静态字段，请使用 SetStaticFieldValue 方法");
+                    return false;
+                }
+
+                // 检查只读字段
+                if (field.IsInitOnly || field.IsLiteral)
+                {
+                    Debug.LogWarning($"[{TAG}] 实例字段 '{type.Name}.{fieldName}' 是只读字段");
                     return false;
                 }
 
@@ -92,33 +102,27 @@ namespace Utilities
                 object convertedValue = ConvertValue(value, field.FieldType);
                 field.SetValue(obj, convertedValue);
 
-                Debug.Log($"[{TAG}] 成功设置字段 '{type.Name}.{fieldName}' = {convertedValue}");
+                Debug.Log($"[{TAG}] 成功设置实例字段 '{type.Name}.{fieldName}' = {convertedValue}");
                 return true;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[{TAG}] 设置字段 '{fieldName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
+                Debug.LogError($"[{TAG}] 设置实例字段 '{fieldName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
 
         /// <summary>
-        /// 安全获取属性值
+        /// 安全获取实例属性值
         /// </summary>
-        /// <typeparam name="T">返回类型</typeparam>
-        /// <param name="obj">目标对象</param>
-        /// <param name="propertyName">属性名</param>
-        /// <param name="defaultValue">默认值</param>
-        /// <param name="bindingFlags">绑定标志</param>
-        /// <returns>属性值或默认值</returns>
-        public static T GetPropertyValue<T>(object obj, string propertyName, T defaultValue = default(T),
-            BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        public static T GetInstancePropertyValue<T>(object obj, string propertyName, T defaultValue = default(T),
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
         {
             try
             {
                 if (obj == null)
                 {
-                    Debug.LogWarning($"[{TAG}] 获取属性 '{propertyName}' 失败：目标对象为null");
+                    Debug.LogWarning($"[{TAG}] 获取实例属性 '{propertyName}' 失败：目标对象为null");
                     return defaultValue;
                 }
 
@@ -127,13 +131,21 @@ namespace Utilities
 
                 if (property == null)
                 {
-                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到属性 '{propertyName}'");
+                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到实例属性 '{propertyName}'");
                     return defaultValue;
                 }
 
                 if (!property.CanRead)
                 {
-                    Debug.LogWarning($"[{TAG}] 属性 '{type.Name}.{propertyName}' 不可读");
+                    Debug.LogWarning($"[{TAG}] 实例属性 '{type.Name}.{propertyName}' 不可读");
+                    return defaultValue;
+                }
+
+                // 检查静态属性
+                MethodInfo getMethod = property.GetGetMethod(true);
+                if (getMethod?.IsStatic == true)
+                {
+                    Debug.LogWarning($"[{TAG}] 属性 '{type.Name}.{propertyName}' 是静态属性，请使用 GetStaticPropertyValue 方法");
                     return defaultValue;
                 }
 
@@ -141,86 +153,33 @@ namespace Utilities
 
                 if (value is T result)
                 {
-                    Debug.Log($"[{TAG}] 成功获取属性 '{type.Name}.{propertyName}' = {result}");
+                    Debug.Log($"[{TAG}] 成功获取实例属性 '{type.Name}.{propertyName}' = {result}");
                     return result;
                 }
                 else
                 {
-                    Debug.LogWarning($"[{TAG}] 属性 '{type.Name}.{propertyName}' 类型不匹配。期望: {typeof(T).Name}, 实际: {value?.GetType().Name ?? "null"}");
+                    Debug.LogWarning($"[{TAG}] 实例属性 '{type.Name}.{propertyName}' 类型不匹配。期望: {typeof(T).Name}, 实际: {value?.GetType().Name ?? "null"}");
                     return defaultValue;
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[{TAG}] 获取属性 '{propertyName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
+                Debug.LogError($"[{TAG}] 获取实例属性 '{propertyName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
                 return defaultValue;
             }
         }
 
         /// <summary>
-        /// 安全设置属性值
+        /// 安全调用实例方法
         /// </summary>
-        /// <param name="obj">目标对象</param>
-        /// <param name="propertyName">属性名</param>
-        /// <param name="value">要设置的值</param>
-        /// <param name="bindingFlags">绑定标志</param>
-        /// <returns>是否设置成功</returns>
-        public static bool SetPropertyValue(object obj, string propertyName, object value,
-            BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+        public static object InvokeInstanceMethod(object obj, string methodName, object[] parameters = null,
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
         {
             try
             {
                 if (obj == null)
                 {
-                    Debug.LogWarning($"[{TAG}] 设置属性 '{propertyName}' 失败：目标对象为null");
-                    return false;
-                }
-
-                Type type = obj.GetType();
-                PropertyInfo property = type.GetProperty(propertyName, bindingFlags);
-
-                if (property == null)
-                {
-                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到属性 '{propertyName}'");
-                    return false;
-                }
-
-                if (!property.CanWrite)
-                {
-                    Debug.LogWarning($"[{TAG}] 属性 '{type.Name}.{propertyName}' 不可写");
-                    return false;
-                }
-
-                // 类型转换
-                object convertedValue = ConvertValue(value, property.PropertyType);
-                property.SetValue(obj, convertedValue);
-
-                Debug.Log($"[{TAG}] 成功设置属性 '{type.Name}.{propertyName}' = {convertedValue}");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[{TAG}] 设置属性 '{propertyName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 安全调用方法
-        /// </summary>
-        /// <param name="obj">目标对象</param>
-        /// <param name="methodName">方法名</param>
-        /// <param name="parameters">参数数组</param>
-        /// <param name="bindingFlags">绑定标志</param>
-        /// <returns>方法返回值，失败返回null</returns>
-        public static object InvokeMethod(object obj, string methodName, object[] parameters = null,
-            BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-        {
-            try
-            {
-                if (obj == null)
-                {
-                    Debug.LogWarning($"[{TAG}] 调用方法 '{methodName}' 失败：目标对象为null");
+                    Debug.LogWarning($"[{TAG}] 调用实例方法 '{methodName}' 失败：目标对象为null");
                     return null;
                 }
 
@@ -229,20 +188,226 @@ namespace Utilities
 
                 if (method == null)
                 {
-                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到方法 '{methodName}'");
+                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到实例方法 '{methodName}'");
+                    return null;
+                }
+
+                if (method.IsStatic)
+                {
+                    Debug.LogWarning($"[{TAG}] 方法 '{type.Name}.{methodName}' 是静态方法，请使用 InvokeStaticMethod 方法");
                     return null;
                 }
 
                 object result = method.Invoke(obj, parameters);
-                Debug.Log($"[{TAG}] 成功调用方法 '{type.Name}.{methodName}'");
+                Debug.Log($"[{TAG}] 成功调用实例方法 '{type.Name}.{methodName}'");
                 return result;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[{TAG}] 调用方法 '{methodName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
+                Debug.LogError($"[{TAG}] 调用实例方法 '{methodName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
                 return null;
             }
         }
+
+        #endregion
+
+        #region 静态成员方法
+
+        /// <summary>
+        /// 安全获取静态字段值
+        /// </summary>
+        public static T GetStaticFieldValue<T>(Type type, string fieldName, T defaultValue = default(T),
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+        {
+            try
+            {
+                if (type == null)
+                {
+                    Debug.LogWarning($"[{TAG}] 获取静态字段 '{fieldName}' 失败：目标类型为null");
+                    return defaultValue;
+                }
+
+                FieldInfo field = type.GetField(fieldName, bindingFlags);
+
+                if (field == null)
+                {
+                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到静态字段 '{fieldName}'");
+                    return defaultValue;
+                }
+
+                if (!field.IsStatic)
+                {
+                    Debug.LogWarning($"[{TAG}] 字段 '{type.Name}.{fieldName}' 不是静态字段");
+                    return defaultValue;
+                }
+
+                object value = field.GetValue(null);
+
+                if (value is T result)
+                {
+                    Debug.Log($"[{TAG}] 成功获取静态字段 '{type.Name}.{fieldName}' = {result}");
+                    return result;
+                }
+                else
+                {
+                    Debug.LogWarning($"[{TAG}] 静态字段 '{type.Name}.{fieldName}' 类型不匹配。期望: {typeof(T).Name}, 实际: {value?.GetType().Name ?? "null"}");
+                    return defaultValue;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[{TAG}] 获取静态字段 '{fieldName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
+                return defaultValue;
+            }
+        }
+
+        /// <summary>
+        /// 安全设置静态字段值
+        /// </summary>
+        public static bool SetStaticFieldValue(Type type, string fieldName, object value,
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+        {
+            try
+            {
+                if (type == null)
+                {
+                    Debug.LogWarning($"[{TAG}] 设置静态字段 '{fieldName}' 失败：目标类型为null");
+                    return false;
+                }
+
+                FieldInfo field = type.GetField(fieldName, bindingFlags);
+
+                if (field == null)
+                {
+                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到静态字段 '{fieldName}'");
+                    return false;
+                }
+
+                if (!field.IsStatic)
+                {
+                    Debug.LogWarning($"[{TAG}] 字段 '{type.Name}.{fieldName}' 不是静态字段");
+                    return false;
+                }
+
+                // 检查只读字段
+                if (field.IsInitOnly || field.IsLiteral)
+                {
+                    Debug.LogWarning($"[{TAG}] 静态字段 '{type.Name}.{fieldName}' 是只读字段");
+                    return false;
+                }
+
+                // 类型转换
+                object convertedValue = ConvertValue(value, field.FieldType);
+                field.SetValue(null, convertedValue);
+
+                Debug.Log($"[{TAG}] 成功设置静态字段 '{type.Name}.{fieldName}' = {convertedValue}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[{TAG}] 设置静态字段 '{fieldName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 安全获取静态属性值
+        /// </summary>
+        public static T GetStaticPropertyValue<T>(Type type, string propertyName, T defaultValue = default(T),
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+        {
+            try
+            {
+                if (type == null)
+                {
+                    Debug.LogWarning($"[{TAG}] 获取静态属性 '{propertyName}' 失败：目标类型为null");
+                    return defaultValue;
+                }
+
+                PropertyInfo property = type.GetProperty(propertyName, bindingFlags);
+
+                if (property == null)
+                {
+                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到静态属性 '{propertyName}'");
+                    return defaultValue;
+                }
+
+                if (!property.CanRead)
+                {
+                    Debug.LogWarning($"[{TAG}] 静态属性 '{type.Name}.{propertyName}' 不可读");
+                    return defaultValue;
+                }
+
+                // 检查静态属性
+                MethodInfo getMethod = property.GetGetMethod(true);
+                if (getMethod?.IsStatic != true)
+                {
+                    Debug.LogWarning($"[{TAG}] 属性 '{type.Name}.{propertyName}' 不是静态属性");
+                    return defaultValue;
+                }
+
+                object value = property.GetValue(null);
+
+                if (value is T result)
+                {
+                    Debug.Log($"[{TAG}] 成功获取静态属性 '{type.Name}.{propertyName}' = {result}");
+                    return result;
+                }
+                else
+                {
+                    Debug.LogWarning($"[{TAG}] 静态属性 '{type.Name}.{propertyName}' 类型不匹配。期望: {typeof(T).Name}, 实际: {value?.GetType().Name ?? "null"}");
+                    return defaultValue;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[{TAG}] 获取静态属性 '{propertyName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
+                return defaultValue;
+            }
+        }
+
+        /// <summary>
+        /// 安全调用静态方法
+        /// </summary>
+        public static object InvokeStaticMethod(Type type, string methodName, object[] parameters = null,
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+        {
+            try
+            {
+                if (type == null)
+                {
+                    Debug.LogWarning($"[{TAG}] 调用静态方法 '{methodName}' 失败：目标类型为null");
+                    return null;
+                }
+
+                MethodInfo method = type.GetMethod(methodName, bindingFlags);
+
+                if (method == null)
+                {
+                    Debug.LogWarning($"[{TAG}] 在类型 '{type.Name}' 中未找到静态方法 '{methodName}'");
+                    return null;
+                }
+
+                if (!method.IsStatic)
+                {
+                    Debug.LogWarning($"[{TAG}] 方法 '{type.Name}.{methodName}' 不是静态方法");
+                    return null;
+                }
+
+                object result = method.Invoke(null, parameters);
+                Debug.Log($"[{TAG}] 成功调用静态方法 '{type.Name}.{methodName}'");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[{TAG}] 调用静态方法 '{methodName}' 时发生异常: {ex.Message}\n{ex.StackTrace}");
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region 通用方法
 
         /// <summary>
         /// 类型转换辅助方法
@@ -277,7 +442,7 @@ namespace Utilities
         /// 检查类型是否包含指定字段
         /// </summary>
         public static bool HasField(Type type, string fieldName,
-            BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
         {
             return type.GetField(fieldName, bindingFlags) != null;
         }
@@ -286,7 +451,7 @@ namespace Utilities
         /// 检查类型是否包含指定属性
         /// </summary>
         public static bool HasProperty(Type type, string propertyName,
-            BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
         {
             return type.GetProperty(propertyName, bindingFlags) != null;
         }
@@ -295,9 +460,11 @@ namespace Utilities
         /// 检查类型是否包含指定方法
         /// </summary>
         public static bool HasMethod(Type type, string methodName,
-            BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            BindingFlags bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
         {
             return type.GetMethod(methodName, bindingFlags) != null;
         }
+
+        #endregion
     }
 }

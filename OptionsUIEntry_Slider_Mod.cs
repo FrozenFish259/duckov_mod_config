@@ -1,21 +1,32 @@
 ﻿using Duckov.Options;
+using Pathfinding;
 using SodaCraft.Localizations;
 using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using Utilities;
 
 namespace ModConfig
 {
     class OptionsUIEntry_Slider_Mod : MonoBehaviour
     {
+
+
         public object Value
         {
             get
             {
                 try
                 {
+                    Type? oldType = ES3Helper.getType(key);
+                    if (oldType != valueType)
+                    {
+                        Debug.LogWarning($"检测到{key}旧配置项类型{oldType}与当前类型{valueType}不同, 已重置为新的默认值");
+                        ES3Helper.DeleteKey(this.key);
+                    }
+
                     if (valueType == typeof(int))
                         return OptionsManager.Load<int>(this.key, (int)defaultValue);
                     else if (valueType == typeof(float))
@@ -29,9 +40,15 @@ namespace ModConfig
                         return loaded;
                     }
                     else if (valueType == typeof(string))
+                    {
+                        Debug.Log("正在读取string配置默认值");
                         return OptionsManager.Load<string>(this.key, (string)defaultValue);
+                    }
                     else if (valueType == typeof(bool))
+                    {
+                        Debug.Log("正在读取bool配置默认值");
                         return OptionsManager.Load<bool>(this.key, (bool)defaultValue);
+                    }
                     else
                     {
                         Debug.LogError($"不支持的配置值类型: {valueType}");

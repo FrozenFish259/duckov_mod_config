@@ -117,7 +117,7 @@ namespace ModConfig
                         return;
                     }
 
-                    var label = ReflectionHelper.GetFieldValue<TextMeshProUGUI>(dropdownUIEntry, "label");
+                    var label = ReflectionHelper.GetInstanceFieldValue<TextMeshProUGUI>(dropdownUIEntry, "label");
                     if (label != null)
                     {
                         label.SetText(description, true);
@@ -127,7 +127,7 @@ namespace ModConfig
                     DropDownOptionsProvider provider = dropdownUIEntry.AddComponent<DropDownOptionsProvider>();
                     provider.init(key, description, options, valueType, defaultValue);
 
-                    ReflectionHelper.SetFieldValue(dropdownUIEntry, "provider", provider);
+                    ReflectionHelper.SetInstanceFieldValue(dropdownUIEntry, "provider", provider);
 
                     // 创建或查找mod标题
                     Transform modTitleTransform = modContent.transform.Find(modName);
@@ -333,7 +333,7 @@ namespace ModConfig
             Debug.Log("OptionsPanel Found");
 
             // 使用反射获取tabButtons
-            var tabButtons = ReflectionHelper.GetFieldValue<List<OptionsPanel_TabButton>>(optionsPanel, "tabButtons");
+            var tabButtons = ReflectionHelper.GetInstanceFieldValue<List<OptionsPanel_TabButton>>(optionsPanel, "tabButtons");
             if (tabButtons == null)
             {
                 Debug.LogError("无法反射获取tabButtons!!!!");
@@ -357,7 +357,7 @@ namespace ModConfig
             ModBehaviour.modTabButton = modTabButton;
 
             // 获取原始tab并克隆
-            var tab = ReflectionHelper.GetFieldValue<GameObject>(modTabButton, "tab");
+            var tab = ReflectionHelper.GetInstanceFieldValue<GameObject>(modTabButton, "tab");
             if (tab == null)
             {
                 Debug.LogError("无法反射获取modTabButton的tab成员");
@@ -370,7 +370,7 @@ namespace ModConfig
             ModBehaviour.modContent = tabClone;
 
             // 设置克隆的tab到tabButton            
-            bool result = ReflectionHelper.SetFieldValue(modTabButton, "tab", tabClone);
+            bool result = ReflectionHelper.SetInstanceFieldValue(modTabButton, "tab", tabClone);
             if (!result)
             {
                 Debug.LogError("反射修改tab成员失败!!");
@@ -383,7 +383,7 @@ namespace ModConfig
             tabButtons.Add(modTabButton);
 
             // 调用Setup更新UI
-            ReflectionHelper.InvokeMethod(optionsPanel, "Setup");
+            ReflectionHelper.InvokeInstanceMethod(optionsPanel, "Setup");
 
             // 修改标签页名称
             TextMeshProUGUI? tabName = modTabButton.GetComponentInChildren<TextMeshProUGUI>(true);
@@ -463,9 +463,9 @@ namespace ModConfig
             //private TextMeshProUGUI label;
             //private Slider slider;
             //private TMP_InputField valueField;
-            var label = ReflectionHelper.GetFieldValue<TextMeshProUGUI>(optionsUIEntry_Slider, "label");
-            var slider = ReflectionHelper.GetFieldValue<UnityEngine.UI.Slider>(optionsUIEntry_Slider, "slider");
-            var valueField = ReflectionHelper.GetFieldValue<TMP_InputField>(optionsUIEntry_Slider, "valueField");
+            var label = ReflectionHelper.GetInstanceFieldValue<TextMeshProUGUI>(optionsUIEntry_Slider, "label");
+            var slider = ReflectionHelper.GetInstanceFieldValue<UnityEngine.UI.Slider>(optionsUIEntry_Slider, "slider");
+            var valueField = ReflectionHelper.GetInstanceFieldValue<TMP_InputField>(optionsUIEntry_Slider, "valueField");
 
             DestroyImmediate(optionsUIEntry_Slider);
 
