@@ -28,15 +28,40 @@ namespace ModConfig
         // Token: 0x17000368 RID: 872
         // (get) Token: 0x060012C4 RID: 4804 RVA: 0x0004674E File Offset: 0x0004494E
         // (set) Token: 0x060012C5 RID: 4805 RVA: 0x00046761 File Offset: 0x00044961
-        public float Value
+        public object Value
         {
             get
             {
-                return OptionsManager.Load<float>(this.key, this.defaultValue);
+                if (valueType == typeof(int))
+                    return OptionsManager.Load<int>(this.key, (int)defaultValue);
+                else if (valueType == typeof(float))
+                    return OptionsManager.Load<float>(this.key, (float)defaultValue);
+                else if (valueType == typeof(double))
+                    return OptionsManager.Load<double>(this.key, (double)defaultValue);
+                else if (valueType == typeof(string))
+                    return OptionsManager.Load<string>(this.key, (string)defaultValue);
+                else if (valueType == typeof(bool))
+                    return OptionsManager.Load<bool>(this.key, (bool)defaultValue);
+                else
+                {
+                    Debug.LogError($"不支持的配置值类型: {valueType}");
+                    return defaultValue;
+                }
             }
             set
             {
-                OptionsManager.Save<float>(this.key, value);
+                if (valueType == typeof(int))
+                    OptionsManager.Save<int>(this.key, (int)value);
+                else if (valueType == typeof(float))
+                    OptionsManager.Save<float>(this.key, (float)value);
+                else if (valueType == typeof(double))
+                    OptionsManager.Save<double>(this.key, (double)value);
+                else if (valueType == typeof(string))
+                    OptionsManager.Save<string>(this.key, (string)value);
+                else if (valueType == typeof(bool))
+                    OptionsManager.Save<bool>(this.key, (bool)value);
+                else
+                    Debug.LogError($"不支持保存的配置值类型: {valueType}");
             }
         }
 
@@ -98,8 +123,33 @@ namespace ModConfig
         // Token: 0x060012CD RID: 4813 RVA: 0x00046864 File Offset: 0x00044A64
         private void RefreshValues()
         {
-            this.valueField.SetTextWithoutNotify(this.Value.ToString(this.valueFormat));
-            this.slider.SetValueWithoutNotify(this.Value);
+            if (valueType == typeof(int)){
+                float v = (int)this.Value;
+
+                this.valueField.SetTextWithoutNotify(v.ToString("F0"));
+                this.slider.SetValueWithoutNotify(v);
+            }
+            else if (valueType == typeof(float))
+            {
+                this.valueField.SetTextWithoutNotify(((float)this.Value).ToString("0"));
+                this.slider.SetValueWithoutNotify((float)this.Value);
+            }
+            else if (valueType == typeof(double))
+            {
+                float v = (float)(double)this.Value;
+
+                this.valueField.SetTextWithoutNotify(v.ToString("0"));
+                this.slider.SetValueWithoutNotify(v);
+            }
+            else if (valueType == typeof(string))
+                //不需要slider
+                this.valueField.SetTextWithoutNotify((string)this.Value);
+                
+            else if (valueType == typeof(bool))
+                //不需要slider
+                this.valueField.SetTextWithoutNotify((bool)(this.Value) ? "True" : "False");
+            else
+                Debug.LogError($"不支持Refresh的配置值类型: {valueType}");
         }
 
         // Token: 0x060012CE RID: 4814 RVA: 0x000468A1 File Offset: 0x00044AA1
@@ -114,7 +164,7 @@ namespace ModConfig
         // Token: 0x04000E1E RID: 3614
         [Space]
         [SerializeField]
-        private float defaultValue;
+        private object defaultValue;
 
         // Token: 0x04000E1F RID: 3615
         [SerializeField]
@@ -128,17 +178,23 @@ namespace ModConfig
         [SerializeField]
         public TMP_InputField valueField;
 
-        // Token: 0x04000E22 RID: 3618
-        [SerializeField]
-        private string valueFormat = "0";
+        private Type valueType;
 
-        public void Init(string key, string description, Type valueType, Vector2? sliderRange)
+        private Vector2? sliderRange = null;
+
+        public void Init(string key, string description, Type valueType,object defaultValue, Vector2? sliderRange)
         {
             this.key = key;
+            this.defaultValue = defaultValue;
+            this.valueType = valueType;
+            this.sliderRange = sliderRange;
             this.label.SetText(description);
 
-            //TODO: 处理不同数据类型
-            
+            //如果sliderRange是null就隐藏
+            if (this.sliderRange == null)
+            {
+                this.slider.gameObject.SetActive(false);
+            }
         }
     }
 }

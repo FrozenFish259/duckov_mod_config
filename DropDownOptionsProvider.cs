@@ -69,6 +69,8 @@ namespace ModConfig
                 return OptionsManager.Load<int>(this.Key, (int)defaultValue);
             else if (valueType == typeof(float))
                 return OptionsManager.Load<float>(this.Key, (float)defaultValue);
+            else if (valueType == typeof(double))
+                return OptionsManager.Load<double>(this.key, (double)defaultValue);
             else if (valueType == typeof(string))
                 return OptionsManager.Load<string>(this.Key, (string)defaultValue);
             else if (valueType == typeof(bool))
@@ -89,6 +91,8 @@ namespace ModConfig
                 OptionsManager.Save<int>(this.Key, (int)value);
             else if (valueType == typeof(float))
                 OptionsManager.Save<float>(this.Key, (float)value);
+            else if (valueType == typeof(double))
+                OptionsManager.Save<double>(this.Key, (double)value);
             else if (valueType == typeof(string))
                 OptionsManager.Save<string>(this.Key, (string)value);
             else if (valueType == typeof(bool))

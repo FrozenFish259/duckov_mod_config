@@ -178,7 +178,7 @@ namespace ModConfig
         /// <param name="description"></param>
         /// <param name="valueType"></param>
         /// <param name="sliderRange">滑条范围, 如果不需要则填null</param>
-        public static void AddInputWithSlider(string modName, string key, string description, Type valueType, Vector2? sliderRange = null)
+        public static void AddInputWithSlider(string modName, string key, string description, Type valueType, object defaultValue, Vector2? sliderRange = null)
         {
             //TODO: 待实现
             AddConfig(() => {
@@ -216,7 +216,7 @@ namespace ModConfig
                     }
 
                     //初始化数据
-                    uIEntry_Slider_Mod.Init(key, description, valueType, sliderRange);
+                    uIEntry_Slider_Mod.Init(key, description, valueType, defaultValue, sliderRange);
 
                     // 创建或查找mod标题
                     Transform modTitleTransform = modContent.transform.Find(modName);
@@ -500,7 +500,9 @@ namespace ModConfig
             AddDropdownList("模组A", "testA2", "测试选项2", dropDownOptions, typeof(int), 0);
             AddDropdownList("模组A", "testA3", "测试选项3", dropDownOptions, typeof(int), 0);
             AddDropdownList("模组B", "testB2", "测试选项2", dropDownOptions, typeof(int), 0);
-            AddInputWithSlider("模组C", "testSlider1", "测试滑条float", typeof(float), new Vector2( 0.0f, 1.0f));
+
+            AddInputWithSlider("模组C", "testSlider1", "测试滑条float", typeof(float), new Vector2(0.0f, 1.0f));
+            AddInputWithSlider("模组C", "testSlider2", "测试滑条无范围float", typeof(float), null);
         }
 
         override protected void OnAfterSetup()
