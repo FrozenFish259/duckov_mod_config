@@ -4,11 +4,9 @@ using SodaCraft.Localizations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 using Utilities;
 
@@ -222,7 +220,7 @@ namespace ModConfig
             Debug.Log("OptionsPanel Found");
 
             // 使用反射获取tabButtons
-            List<OptionsPanel_TabButton>? tabButtons = GetTabButtons(optionsPanel);
+            var tabButtons = ReflectionHelper.GetFieldValue<List<OptionsPanel_TabButton>>(optionsPanel, "tabButtons");
             if (tabButtons == null)
             {
                 Debug.LogError("无法反射获取tabButtons!!!!");
@@ -246,7 +244,7 @@ namespace ModConfig
             ModBehaviour.modTabButton = modTabButton;
 
             // 获取原始tab并克隆
-            GameObject? tab = GetTabFromOptionsPanel_TabButton(modTabButton);
+            var tab = ReflectionHelper.GetFieldValue<GameObject>(modTabButton, "tab");
             if (tab == null)
             {
                 Debug.LogError("无法反射获取modTabButton的tab成员");
@@ -258,8 +256,8 @@ namespace ModConfig
             tabClone.name = "modContent";
             ModBehaviour.modContent = tabClone;
 
-            // 设置克隆的tab到tabButton
-            bool result = SetTabForOptionsPanel_TabButton(modTabButton, tabClone);
+            // 设置克隆的tab到tabButton            
+            bool result = ReflectionHelper.SetFieldValue(modTabButton, "tab", tabClone);
             if (!result)
             {
                 Debug.LogError("反射修改tab成员失败!!");
@@ -272,7 +270,7 @@ namespace ModConfig
             tabButtons.Add(modTabButton);
 
             // 调用Setup更新UI
-            InvokeSetup(optionsPanel);
+            ReflectionHelper.InvokeMethod(optionsPanel, "Setup");
 
             // 修改标签页名称
             TextMeshProUGUI? tabName = modTabButton.GetComponentInChildren<TextMeshProUGUI>(true);
@@ -316,98 +314,8 @@ namespace ModConfig
             ProcessPendingConfigs();
         }
 
-        private void InvokeSetup(OptionsPanel optionsPanel)
-        {
-            if (optionsPanel == null)
-            {
-                Debug.LogWarning("OptionsPanel 实例为 null");
-                return;
-            }
-
-            Type optionsPanelType = typeof(OptionsPanel);
-            MethodInfo setupMethod = optionsPanelType.GetMethod("Setup", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (setupMethod != null)
-            {
-                try
-                {
-                    setupMethod.Invoke(optionsPanel, null);
-                    Debug.Log("成功调用 Setup 方法");
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"调用 Setup 方法失败: {ex.Message}\n{ex.StackTrace}");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("未找到 Setup 方法");
-            }
-        }
-
-        private List<OptionsPanel_TabButton>? GetTabButtons(OptionsPanel optionsPanel)
-        {
-            if (optionsPanel == null) return null;
-
-            Type optionsPanelType = typeof(OptionsPanel);
-            FieldInfo tabButtonsField = optionsPanelType.GetField("tabButtons", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (tabButtonsField != null)
-            {
-                return tabButtonsField.GetValue(optionsPanel) as List<OptionsPanel_TabButton>;
-            }
-
-            return null;
-        }
-
-        private GameObject? GetTabFromOptionsPanel_TabButton(OptionsPanel_TabButton tabButton)
-        {
-            if (tabButton == null) return null;
-
-            Type OptionsPanel_TabButtonType = typeof(OptionsPanel_TabButton);
-            FieldInfo tabField = OptionsPanel_TabButtonType.GetField("tab", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (tabField != null)
-            {
-                return tabField.GetValue(tabButton) as GameObject;
-            }
-
-            return null;
-        }
-
-        private bool SetTabForOptionsPanel_TabButton(OptionsPanel_TabButton tabButton, GameObject newTab)
-        {
-            if (tabButton == null) return false;
-
-            Type optionsPanelTabButtonType = typeof(OptionsPanel_TabButton);
-            FieldInfo tabField = optionsPanelTabButtonType.GetField("tab", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            if (tabField != null)
-            {
-                try
-                {
-                    tabField.SetValue(tabButton, newTab);
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"设置 tab 字段失败: {ex.Message}");
-                    return false;
-                }
-            }
-
-            Debug.LogWarning("未找到 tab 字段");
-            return false;
-        }
-
         private void TestAddDropDownlist()
         {
-            //if (modContent == null)
-            //{
-            //    Debug.LogWarning("modContent 尚未初始化，延迟测试添加下拉列表");
-            //    return;
-            //}
-
             SortedDictionary<string, object> options = new SortedDictionary<string, object>()
             {
                 { "选项1", 1 },
