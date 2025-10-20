@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -8,6 +9,8 @@ using UnityEngine;
 /// </summary>
 public static class ModConfigAPI
 {
+    public static string ModConfigName = "ModConfig";
+
     //Ensure this match the number of ModConfig.ModBehaviour.VERSION
     //这里确保版本号与ModConfig.ModBehaviour.VERSION匹配
     private const int ModConfigVersion = 1;
@@ -15,7 +18,7 @@ public static class ModConfigAPI
     private static string TAG = $"ModConfig_v{ModConfigVersion}";
 
     private static Type modBehaviourType;
-    private static bool isInitialized = false;
+    public static bool isInitialized = false;
     private static bool versionChecked = false;
     private static bool isVersionCompatible = false;
 
@@ -80,7 +83,7 @@ public static class ModConfigAPI
 
             // 获取 ModBehaviour 类型
             // Get ModBehaviour type
-            modBehaviourType = Type.GetType("ModConfig.ModBehaviour");
+            modBehaviourType = FindTypeInAssemblies("ModConfig.ModBehaviour");
             if (modBehaviourType == null)
             {
                 Debug.LogWarning($"[{TAG}] ModConfig.ModBehaviour 类型未找到，ModConfig 可能未加载");
@@ -121,6 +124,57 @@ public static class ModConfigAPI
         {
             Debug.LogError($"[{TAG}] 初始化失败: {ex.Message}");
             return false;
+        }
+    }
+
+    /// <summary>
+    /// 在所有已加载的程序集中查找类型
+    /// </summary>
+    private static Type FindTypeInAssemblies(string typeName)
+    {
+        try
+        {
+            // 获取当前域中的所有程序集
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            foreach (Assembly assembly in assemblies)
+            {
+                try
+                {
+                    // 检查程序集名称是否包含 ModConfig
+                    if (assembly.FullName.Contains("ModConfig"))
+                    {
+                        Debug.Log($"[{TAG}] 找到 ModConfig 相关程序集: {assembly.FullName}");
+                    }
+
+                    // 尝试在该程序集中查找类型
+                    Type type = assembly.GetType(typeName);
+                    if (type != null)
+                    {
+                        Debug.Log($"[{TAG}] 在程序集 {assembly.FullName} 中找到类型 {typeName}");
+                        return type;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 忽略单个程序集的查找错误
+                    continue;
+                }
+            }
+
+            // 记录所有已加载的程序集用于调试
+            Debug.LogWarning($"[{TAG}] 在所有程序集中未找到类型 {typeName}，已加载程序集数量: {assemblies.Length}");
+            foreach (var assembly in assemblies.Where(a => a.FullName.Contains("ModConfig")))
+            {
+                Debug.Log($"[{TAG}] ModConfig 相关程序集: {assembly.FullName}");
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[{TAG}] 程序集扫描失败: {ex.Message}");
+            return null;
         }
     }
 
