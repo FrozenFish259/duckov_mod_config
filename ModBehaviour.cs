@@ -275,13 +275,13 @@ namespace ModConfig
         
         void Awake()
         {
-            ExampleUsingModConfig.OnActive();
+            //ExampleUsingModConfig.OnActive();
             Debug.Log("ModConfig Mod Awake");
         }
 
         void OnDestroy()
         {
-            ExampleUsingModConfig.OnDeactivate();
+            //ExampleUsingModConfig.OnDeactivate();
             // 清理静态变量
             modTabButton = null;
             modContent = null;

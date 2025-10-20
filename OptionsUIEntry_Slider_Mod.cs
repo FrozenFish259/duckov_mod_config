@@ -143,8 +143,8 @@ namespace ModConfig
                 {
                     if (int.TryParse(arg0, out int intValue))
                     {
-                        if (this.slider != null)
-                            intValue = Mathf.Clamp(intValue, (int)this.slider.minValue, (int)this.slider.maxValue);
+                        if (this.sliderRange != null)
+                            intValue = Mathf.Clamp(intValue, (int)this.sliderRange.Value.x, (int)this.sliderRange.Value.y);
                         this.Value = intValue;
                     }
                     else
@@ -158,8 +158,8 @@ namespace ModConfig
                 {
                     if (float.TryParse(arg0, out float floatValue))
                     {
-                        if (this.slider != null)
-                            floatValue = Mathf.Clamp(floatValue, this.slider.minValue, this.slider.maxValue);
+                        if (this.sliderRange != null)
+                            floatValue = Mathf.Clamp(floatValue, this.sliderRange.Value.x, this.sliderRange.Value.y);
                         this.Value = floatValue;
                     }
                     else
@@ -302,9 +302,10 @@ namespace ModConfig
 
         public void Init(string key, string description, Type valueType, object defaultValue, Vector2? sliderRange)
         {
-            if(defaultValue == null)
+            if (defaultValue == null)
             {
-                Debug.LogError("配置项默认值不能为null: "+ key);
+                Debug.LogError("配置项默认值不能为null: " + key);
+                return;
             }
 
             if (valueField == null)
@@ -315,6 +316,7 @@ namespace ModConfig
             else
             {
                 valueField.contentType = TMP_InputField.ContentType.Standard;
+                valueField.characterLimit = 1000;
             }
 
             if (this.slider == null)
@@ -331,29 +333,14 @@ namespace ModConfig
             if (this.label != null)
                 this.label.SetText(description);
 
-            if (sliderRange != null)
+            // 设置 slider 的范围和可见性
+            if (sliderRange.HasValue)
             {
-                if (valueType == typeof(float))
-                {
-                    float defaultV = Convert.ToSingle(defaultValue);
-                    if (defaultV < sliderRange.Value.x || defaultV > sliderRange.Value.y)
-                    {
-                        Debug.LogError($"配置项{key}的默认值超出设置的范围!!!");
-                    }
-                }
-            }
-
-
-            this.slider.minValue = float.MinValue;
-            this.slider.maxValue = float.MaxValue;
-
-            // 设置slider的范围
-            if (sliderRange.HasValue && this.slider != null)
-            {
+                // 有范围时，设置 slider 范围并显示
                 this.slider.minValue = sliderRange.Value.x;
                 this.slider.maxValue = sliderRange.Value.y;
 
-                // 根据类型设置slider的整数模式
+                // 根据类型设置整数模式
                 if (valueType == typeof(int))
                 {
                     this.slider.wholeNumbers = true;
@@ -364,15 +351,57 @@ namespace ModConfig
                 }
 
                 this.slider.gameObject.SetActive(true);
+
+                // 验证默认值是否在范围内
+                try
+                {
+                    if (valueType == typeof(float))
+                    {
+                        float defaultV = Convert.ToSingle(defaultValue);
+                        if (defaultV < sliderRange.Value.x || defaultV > sliderRange.Value.y)
+                        {
+                            Debug.LogError($"配置项{key}的默认值{defaultV}超出设置的范围[{sliderRange.Value.x}, {sliderRange.Value.y}]");
+                        }
+                    }
+                    else if (valueType == typeof(int))
+                    {
+                        int defaultV = Convert.ToInt32(defaultValue);
+                        if (defaultV < sliderRange.Value.x || defaultV > sliderRange.Value.y)
+                        {
+                            Debug.LogError($"配置项{key}的默认值{defaultV}超出设置的范围[{sliderRange.Value.x}, {sliderRange.Value.y}]");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"验证默认值范围时出错: {ex.Message}");
+                }
             }
-            else if (this.slider != null)
+            else
             {
-                // 如果sliderRange是null就隐藏slider
-                this.slider.gameObject.SetActive(false);
+                // 没有范围时，隐藏 slider
+                // 同时去除数值范围限制
+                if (valueType == typeof(int))
+                {
+                    // 对于整数，设置合理的范围
+                    this.slider.minValue = int.MinValue;
+                    this.slider.maxValue = int.MaxValue;
+                    this.slider.wholeNumbers = true;
+                }
+                else if (valueType == typeof(float))
+                {
+                    // 对于浮点数，设置合理的范围（避免使用 float.MinValue/MaxValue）
+                    this.slider.minValue = -100000f;  // 足够大的负值
+                    this.slider.maxValue = 100000f;   // 足够大的正值
+                    this.slider.wholeNumbers = false;
+                }
+
+                this.slider.gameObject.SetActive(true);
+                Debug.Log($"已解除slider范围限制 - Key: {key}, 新范围: [{this.slider.minValue}, {this.slider.maxValue}]");
             }
 
             initDone = true;
-            
+
             // 初始化显示
             RefreshValues();
         }
