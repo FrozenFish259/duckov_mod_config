@@ -8,7 +8,11 @@ using UnityEngine;
 /// </summary>
 public static class ModConfigAPI
 {
-    private const string TAG = "ModConfigAPI";
+    //Ensure this match the number of ModConfig.ModBehaviour.VERSION
+    //这里确保版本号与ModConfig.ModBehaviour.VERSION匹配
+    private const int ModConfigVersion = 1;
+
+    private static string TAG = $"ModConfig_v{ModConfigVersion}";
 
     private static Type modBehaviourType;
     private static bool isInitialized = false;
@@ -30,6 +34,9 @@ public static class ModConfigAPI
                 Debug.LogWarning($"[{TAG}] ModConfig.ModBehaviour 类型未找到，ModConfig 可能未加载");
                 return false;
             }
+
+            //判断ModConfig版本
+
 
             // 检查必要的静态方法是否存在
             string[] requiredMethods = {

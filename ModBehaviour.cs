@@ -15,6 +15,8 @@ namespace ModConfig
 {
     public class ModBehaviour : Duckov.Modding.ModBehaviour
     {
+        public static int VERSION = 1;
+
         private static bool createdModTab = false;
 
         private static OptionsPanel_TabButton? modTabButton = null;
