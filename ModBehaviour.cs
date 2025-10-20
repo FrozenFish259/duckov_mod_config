@@ -501,8 +501,8 @@ namespace ModConfig
             AddDropdownList("模组A", "testA3", "测试选项3", dropDownOptions, typeof(int), 0);
             AddDropdownList("模组B", "testB2", "测试选项2", dropDownOptions, typeof(int), 0);
 
-            AddInputWithSlider("模组C", "testSlider1", "测试滑条float", typeof(float), new Vector2(0.0f, 1.0f));
-            AddInputWithSlider("模组C", "testSlider2", "测试滑条无范围float", typeof(float), null);
+            //AddInputWithSlider("模组C", "testSlider11", "测试滑条float", typeof(float), new Vector2(0.0f, 1.0f));
+            AddInputWithSlider("模组C", "testSlider22", "测试滑条无范围float", typeof(float), 1.0, null);
         }
 
         override protected void OnAfterSetup()

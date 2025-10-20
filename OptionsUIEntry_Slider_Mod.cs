@@ -8,193 +8,279 @@ using UnityEngine.UI;
 
 namespace ModConfig
 {
-    class OptionsUIEntry_Slider_Mod: MonoBehaviour
+    class OptionsUIEntry_Slider_Mod : MonoBehaviour
     {
-        // Token: 0x17000367 RID: 871
-        // (get) Token: 0x060012C2 RID: 4802 RVA: 0x0004673A File Offset: 0x0004493A
-        // (set) Token: 0x060012C3 RID: 4803 RVA: 0x0004674C File Offset: 0x0004494C
-        //[LocalizationKey("Options")]
-        //private string labelKey
-        //{
-        //    get
-        //    {
-        //        return "Options_" + this.key;
-        //    }
-        //    set
-        //    {
-        //    }
-        //}
-
-        // Token: 0x17000368 RID: 872
-        // (get) Token: 0x060012C4 RID: 4804 RVA: 0x0004674E File Offset: 0x0004494E
-        // (set) Token: 0x060012C5 RID: 4805 RVA: 0x00046761 File Offset: 0x00044961
         public object Value
         {
             get
             {
-                if (valueType == typeof(int))
-                    return OptionsManager.Load<int>(this.key, (int)defaultValue);
-                else if (valueType == typeof(float))
-                    return OptionsManager.Load<float>(this.key, (float)defaultValue);
-                else if (valueType == typeof(double))
-                    return OptionsManager.Load<double>(this.key, (double)defaultValue);
-                else if (valueType == typeof(string))
-                    return OptionsManager.Load<string>(this.key, (string)defaultValue);
-                else if (valueType == typeof(bool))
-                    return OptionsManager.Load<bool>(this.key, (bool)defaultValue);
-                else
+                try
                 {
-                    Debug.LogError($"不支持的配置值类型: {valueType}");
+                    if (valueType == typeof(int))
+                        return OptionsManager.Load<int>(this.key, (int)defaultValue);
+                    else if (valueType == typeof(float))
+                    {
+                        Debug.Log("正在读取float配置默认值");
+                        float defaultV = Convert.ToSingle(defaultValue);
+                        Debug.Log("float配置默认值为" + defaultV.ToString("F1"));
+                        float loaded = OptionsManager.Load<float>(this.key, defaultV);
+                        Debug.Log("float配置数值已读取=" + loaded.ToString("F1"));
+
+                        return loaded;
+                    }
+                    else if (valueType == typeof(string))
+                        return OptionsManager.Load<string>(this.key, (string)defaultValue);
+                    else if (valueType == typeof(bool))
+                        return OptionsManager.Load<bool>(this.key, (bool)defaultValue);
+                    else
+                    {
+                        Debug.LogError($"不支持的配置值类型: {valueType}");
+                        return defaultValue;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"获取配置值时发生错误: {ex.Message} valueType={valueType} key={key}");
                     return defaultValue;
                 }
             }
             set
             {
-                if (valueType == typeof(int))
-                    OptionsManager.Save<int>(this.key, (int)value);
-                else if (valueType == typeof(float))
-                    OptionsManager.Save<float>(this.key, (float)value);
-                else if (valueType == typeof(double))
-                    OptionsManager.Save<double>(this.key, (double)value);
-                else if (valueType == typeof(string))
-                    OptionsManager.Save<string>(this.key, (string)value);
-                else if (valueType == typeof(bool))
-                    OptionsManager.Save<bool>(this.key, (bool)value);
-                else
-                    Debug.LogError($"不支持保存的配置值类型: {valueType}");
+                try
+                {
+                    if (valueType == typeof(int))
+                    {
+                        int intValue = Convert.ToInt32(value);
+                        OptionsManager.Save<int>(this.key, intValue);
+                    }
+                    else if (valueType == typeof(float))
+                    {
+                        float floatValue = Convert.ToSingle(value);
+                        OptionsManager.Save<float>(this.key, floatValue);
+                    }
+                    else if (valueType == typeof(string))
+                    {
+                        OptionsManager.Save<string>(this.key, value?.ToString() ?? "");
+                    }
+                    else if (valueType == typeof(bool))
+                    {
+                        bool boolValue = Convert.ToBoolean(value);
+                        OptionsManager.Save<bool>(this.key, boolValue);
+                    }
+                    else
+                    {
+                        Debug.LogError($"不支持保存的配置值类型: {valueType}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"保存配置值时发生错误: {ex.Message}");
+                }
             }
         }
 
-        // Token: 0x060012C6 RID: 4806 RVA: 0x00046770 File Offset: 0x00044970
         private void Awake()
         {
-            this.slider.onValueChanged.AddListener(new UnityAction<float>(this.OnSliderValueChanged));
-            this.valueField.onEndEdit.AddListener(new UnityAction<string>(this.OnFieldEndEdit));
+            // 确保组件已经初始化
+            if (this.slider != null)
+                this.slider.onValueChanged.AddListener(new UnityAction<float>(this.OnSliderValueChanged));
+
+            if (this.valueField != null)
+                this.valueField.onEndEdit.AddListener(new UnityAction<string>(this.OnFieldEndEdit));
+
             this.RefreshLable();
             LocalizationManager.OnSetLanguage += this.OnLanguageChanged;
         }
 
-        // Token: 0x060012C7 RID: 4807 RVA: 0x000467CC File Offset: 0x000449CC
+        private void Start()
+        {
+            // 在Start中确保初始化完成后再刷新值
+            this.RefreshValues();
+        }
+
         private void OnDestroy()
         {
             LocalizationManager.OnSetLanguage -= this.OnLanguageChanged;
         }
 
-        // Token: 0x060012C8 RID: 4808 RVA: 0x000467DF File Offset: 0x000449DF
         private void OnLanguageChanged(SystemLanguage language)
         {
             this.RefreshLable();
         }
 
-        // Token: 0x060012C9 RID: 4809 RVA: 0x000467E7 File Offset: 0x000449E7
         private void RefreshLable()
         {
-            //if (this.label)
-            //{
-            //    this.label.text = this.labelKey.ToPlainText();
-            //}
+            // 保持原有的标签刷新逻辑
         }
 
-        // Token: 0x060012CA RID: 4810 RVA: 0x0004680C File Offset: 0x00044A0C
         private void OnFieldEndEdit(string arg0)
         {
-            float value;
-            if (float.TryParse(arg0, out value))
+            try
             {
-                value = Mathf.Clamp(value, this.slider.minValue, this.slider.maxValue);
-                this.Value = value;
+                if (valueType == typeof(int))
+                {
+                    if (int.TryParse(arg0, out int intValue))
+                    {
+                        if (this.slider != null)
+                            intValue = Mathf.Clamp(intValue, (int)this.slider.minValue, (int)this.slider.maxValue);
+                        this.Value = intValue;
+                    }
+                }
+                else if (valueType == typeof(float))
+                {
+                    if (float.TryParse(arg0, out float floatValue))
+                    {
+                        if (this.slider != null)
+                            floatValue = Mathf.Clamp(floatValue, this.slider.minValue, this.slider.maxValue);
+                        this.Value = floatValue;
+                    }
+                }
+                else if (valueType == typeof(string))
+                {
+                    this.Value = arg0;
+                }
+                else if (valueType == typeof(bool))
+                {
+                    if (bool.TryParse(arg0, out bool boolValue))
+                    {
+                        this.Value = boolValue;
+                    }
+                }
             }
+            catch (Exception ex)
+            {
+                Debug.LogError($"处理输入框值时发生错误: {ex.Message}");
+            }
+
             this.RefreshValues();
         }
 
-        // Token: 0x060012CB RID: 4811 RVA: 0x0004684D File Offset: 0x00044A4D
         private void OnEnable()
         {
             this.RefreshValues();
         }
 
-        // Token: 0x060012CC RID: 4812 RVA: 0x00046855 File Offset: 0x00044A55
         private void OnSliderValueChanged(float value)
         {
             this.Value = value;
             this.RefreshValues();
         }
 
-        // Token: 0x060012CD RID: 4813 RVA: 0x00046864 File Offset: 0x00044A64
         private void RefreshValues()
         {
-            if (valueType == typeof(int)){
-                float v = (int)this.Value;
-
-                this.valueField.SetTextWithoutNotify(v.ToString("F0"));
-                this.slider.SetValueWithoutNotify(v);
-            }
-            else if (valueType == typeof(float))
+            if (!initDone)
             {
-                this.valueField.SetTextWithoutNotify(((float)this.Value).ToString("0"));
-                this.slider.SetValueWithoutNotify((float)this.Value);
+                return;
             }
-            else if (valueType == typeof(double))
-            {
-                float v = (float)(double)this.Value;
 
-                this.valueField.SetTextWithoutNotify(v.ToString("0"));
-                this.slider.SetValueWithoutNotify(v);
+            try
+            {
+                object currentValue = this.Value;
+
+                if (valueType == typeof(int))
+                {
+                    int intValue = Convert.ToInt32(currentValue);
+                    if (this.valueField != null)
+                        this.valueField.SetTextWithoutNotify(intValue.ToString());
+                    if (this.slider != null)
+                        this.slider.SetValueWithoutNotify(intValue);
+                }
+                else if (valueType == typeof(float))
+                {
+                    float floatValue = Convert.ToSingle(currentValue);
+                    if (this.valueField != null)
+                        this.valueField.SetTextWithoutNotify(floatValue.ToString("F2"));
+                    if (this.slider != null)
+                        this.slider.SetValueWithoutNotify(floatValue);
+                }
+                else if (valueType == typeof(string))
+                {
+                    // 不需要slider
+                    if (this.valueField != null)
+                        this.valueField.SetTextWithoutNotify((string)currentValue);
+                    if (this.slider != null)
+                        this.slider.gameObject.SetActive(false);
+                }
+                else if (valueType == typeof(bool))
+                {
+                    // 不需要slider
+                    bool boolValue = Convert.ToBoolean(currentValue);
+                    if (this.valueField != null)
+                        this.valueField.SetTextWithoutNotify(boolValue ? "True" : "False");
+                    if (this.slider != null)
+                        this.slider.gameObject.SetActive(false);
+                }
+                else
+                {
+                    Debug.LogError($"不支持Refresh的配置值类型: {valueType}");
+                }
             }
-            else if (valueType == typeof(string))
-                //不需要slider
-                this.valueField.SetTextWithoutNotify((string)this.Value);
-                
-            else if (valueType == typeof(bool))
-                //不需要slider
-                this.valueField.SetTextWithoutNotify((bool)(this.Value) ? "True" : "False");
-            else
-                Debug.LogError($"不支持Refresh的配置值类型: {valueType}");
+            catch (Exception ex)
+            {
+                Debug.LogError($"刷新UI值时发生错误: {ex.Message}");
+            }
         }
 
-        // Token: 0x060012CE RID: 4814 RVA: 0x000468A1 File Offset: 0x00044AA1
-        //private void OnValidate()
-        //{
-        //    this.RefreshLable();
-        //}
+        private bool initDone = false;
 
-        // Token: 0x04000E1D RID: 3613
-        private string key;
+        private string key = "";
 
-        // Token: 0x04000E1E RID: 3614
         [Space]
-        [SerializeField]
-        private object defaultValue;
+        private object? defaultValue = null;
 
-        // Token: 0x04000E1F RID: 3615
-        [SerializeField]
-        public TextMeshProUGUI label;
+        public TextMeshProUGUI? label;
 
-        // Token: 0x04000E20 RID: 3616
-        [SerializeField]
-        public Slider slider;
+        public Slider? slider;
 
-        // Token: 0x04000E21 RID: 3617
-        [SerializeField]
-        public TMP_InputField valueField;
+        public TMP_InputField? valueField;
 
-        private Type valueType;
-
+        private Type valueType = typeof(float);
         private Vector2? sliderRange = null;
 
-        public void Init(string key, string description, Type valueType,object defaultValue, Vector2? sliderRange)
+        public void Init(string key, string description, Type valueType, object defaultValue, Vector2? sliderRange)
         {
+            if(defaultValue == null)
+            {
+                Debug.LogError("配置项默认值不能为null: "+ key);
+            }
+
             this.key = key;
             this.defaultValue = defaultValue;
             this.valueType = valueType;
             this.sliderRange = sliderRange;
-            this.label.SetText(description);
 
-            //如果sliderRange是null就隐藏
-            if (this.sliderRange == null)
+            if (this.label != null)
+                this.label.SetText(description);
+
+            // 设置slider的范围
+            if (sliderRange.HasValue && this.slider != null)
             {
+                this.slider.minValue = sliderRange.Value.x;
+                this.slider.maxValue = sliderRange.Value.y;
+
+                // 根据类型设置slider的整数模式
+                if (valueType == typeof(int))
+                {
+                    this.slider.wholeNumbers = true;
+                }
+                else
+                {
+                    this.slider.wholeNumbers = false;
+                }
+
+                this.slider.gameObject.SetActive(true);
+            }
+            else if (this.slider != null)
+            {
+                // 如果sliderRange是null就隐藏slider
                 this.slider.gameObject.SetActive(false);
             }
+
+
+             initDone = true;
+
+            // 初始化显示
+            RefreshValues();
         }
     }
 }
