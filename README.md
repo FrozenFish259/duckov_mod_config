@@ -3,6 +3,8 @@
 * Mod设置菜单需要进入游戏场景后再打开设置才能看到, 主菜单中设置里暂不可见。  
 * 第一次启用或重新开关本mod后可能需要重启游戏以生效。
 
+![ScreenShot](./20251020163234_1.jpg)
+
 ## 配置文件位置
 如果你想重置mod配置, 可以删除下面的文件
 > %USERPROFILE%\AppData\LocalLow\TeamSoda\Duckov\Saves\Mods.ES3
