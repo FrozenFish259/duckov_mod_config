@@ -34,7 +34,7 @@ namespace ModConfig
         /// <summary>
         /// 添加配置项的通用方法（支持延迟初始化）
         /// </summary>
-        public static void AddConfig(Action configAction)
+        private static void AddConfig(Action configAction)
         {
             if (modTabButton != null && modContent != null)
             {
@@ -273,11 +273,10 @@ namespace ModConfig
                 }
             });
         }
-
+        
         void Awake()
         {
-            TestAddDropDownlist();
-            Debug.Log("ModConfig Mod Loaded!!!");
+            Debug.Log("ModConfig Mod Awake");
         }
 
         void OnDestroy()
