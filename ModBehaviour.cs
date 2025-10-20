@@ -501,7 +501,7 @@ namespace ModConfig
             AddDropdownList("模组A", "testA3", "测试选项3", dropDownOptions, typeof(int), 0);
             AddDropdownList("模组B", "testB2", "测试选项2", dropDownOptions, typeof(int), 0);
 
-            AddInputWithSlider("模组C", "testSlider11", "测试滑条带范围float", typeof(float), 2.0, new Vector2(0.0f, 5.0f));
+            AddInputWithSlider("模组C", "testSlider11", "测试滑条带范围float", typeof(string), "test", null);
             AddInputWithSlider("模组C", "testSlider22", "测试滑条无范围float", typeof(float), 1.0, null);
         }
 

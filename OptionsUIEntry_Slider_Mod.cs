@@ -90,7 +90,7 @@ namespace ModConfig
                 this.valueField.onEndEdit.AddListener(new UnityAction<string>(this.OnFieldEndEdit));
 
             this.RefreshLable();
-            LocalizationManager.OnSetLanguage += this.OnLanguageChanged;
+            //LocalizationManager.OnSetLanguage += this.OnLanguageChanged;
         }
 
         private void Start()
@@ -111,6 +111,10 @@ namespace ModConfig
 
         private void RefreshLable()
         {
+            if (!initDone)
+            {
+                return;
+            }
             // 保持原有的标签刷新逻辑
         }
 
@@ -158,11 +162,21 @@ namespace ModConfig
 
         private void OnEnable()
         {
+            if (!initDone)
+            {
+                return;
+            }
+
             this.RefreshValues();
         }
 
         private void OnSliderValueChanged(float value)
         {
+            if (!initDone)
+            {
+                return;
+            }
+
             this.Value = value;
             this.RefreshValues();
         }
@@ -291,6 +305,7 @@ namespace ModConfig
 
             initDone = true;
 
+            
             // 初始化显示
             RefreshValues();
         }
