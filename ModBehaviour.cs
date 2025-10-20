@@ -493,16 +493,21 @@ namespace ModConfig
                 { "选项2", 2 },
                 { "选项3", 3 },
                 { "选项4", 4 },
+                { "选项5", 5 },
             };
 
-            AddDropdownList("模组A", "testA1", "测试选项1", dropDownOptions, typeof(int), 0);
-            AddDropdownList("模组B", "testB1", "测试选项1", dropDownOptions, typeof(int), 0);
-            AddDropdownList("模组A", "testA2", "测试选项2", dropDownOptions, typeof(int), 0);
-            AddDropdownList("模组A", "testA3", "测试选项3", dropDownOptions, typeof(int), 0);
-            AddDropdownList("模组B", "testB2", "测试选项2", dropDownOptions, typeof(int), 0);
+            //测试乱序插入AB两个模组
+            AddDropdownList("Mod A", "testA1", "Dropdown1", dropDownOptions, typeof(int), 1);
+            AddDropdownList("Mod B", "testB1", "Dropdown1", dropDownOptions, typeof(int), 2);
+            AddDropdownList("Mod A", "testA2", "Dropdown2", dropDownOptions, typeof(int), 3);
+            AddDropdownList("Mod A", "testA3", "Dropdown3", dropDownOptions, typeof(int), 4);
+            AddDropdownList("Mod B", "testB2", "Dropdown2", dropDownOptions, typeof(int), 5);
 
-            AddInputWithSlider("模组C", "testSlider11", "测试滑条带范围float", typeof(string), "test", null);
-            AddInputWithSlider("模组C", "testSlider22", "测试滑条无范围float", typeof(float), 1.0, null);
+            AddInputWithSlider("Mod C", "testSlider1", "Float Slider no range", typeof(float), 33.89, null);
+            AddInputWithSlider("Mod C", "testSlider2", "Float Slider with range(1.0-5.0)", typeof(float), 2.6, new Vector2(1.0f, 5.0f));
+            AddInputWithSlider("Mod C", "testSlider3", "Int Slider no range", typeof(int), 4, null);
+            AddInputWithSlider("Mod C", "testSlider4", "Int Slider with range(5-20)", typeof(int), 12, new Vector2(5f, 20f));
+            AddInputWithSlider("Mod C", "testSlider5", "String without slider", typeof(string), "testStr", null);
         }
 
         override protected void OnAfterSetup()

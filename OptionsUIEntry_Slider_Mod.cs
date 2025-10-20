@@ -147,6 +147,12 @@ namespace ModConfig
                             intValue = Mathf.Clamp(intValue, (int)this.slider.minValue, (int)this.slider.maxValue);
                         this.Value = intValue;
                     }
+                    else
+                    {
+                        // 输入无效，恢复原值
+                        Debug.LogWarning("请输入有效的整数");
+                        this.RefreshValues();
+                    }
                 }
                 else if (valueType == typeof(float))
                 {
@@ -155,6 +161,12 @@ namespace ModConfig
                         if (this.slider != null)
                             floatValue = Mathf.Clamp(floatValue, this.slider.minValue, this.slider.maxValue);
                         this.Value = floatValue;
+                    }
+                    else
+                    {
+                        // 输入无效，恢复原值
+                        Debug.LogWarning("请输入有效的数字");
+                        this.RefreshValues();
                     }
                 }
                 else if (valueType == typeof(string))
@@ -167,11 +179,30 @@ namespace ModConfig
                     {
                         this.Value = boolValue;
                     }
+                    else
+                    {
+                        // 尝试其他布尔表示形式
+                        string lowerArg = arg0.ToLower();
+                        if (lowerArg == "true" || lowerArg == "1" || lowerArg == "yes" || lowerArg == "on")
+                        {
+                            this.Value = true;
+                        }
+                        else if (lowerArg == "false" || lowerArg == "0" || lowerArg == "no" || lowerArg == "off")
+                        {
+                            this.Value = false;
+                        }
+                        else
+                        {
+                            Debug.LogWarning("请输入 true/false, 1/0, yes/no, on/off");
+                            this.RefreshValues();
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
                 Debug.LogError($"处理输入框值时发生错误: {ex.Message}");
+                this.RefreshValues(); // 出错时恢复原值
             }
 
             this.RefreshValues();
@@ -276,7 +307,17 @@ namespace ModConfig
                 Debug.LogError("配置项默认值不能为null: "+ key);
             }
 
-            this.key = key;
+            if (valueField == null)
+            {
+                Debug.LogError("valueField为空!!");
+                return;
+            }
+            else
+            {
+                valueField.contentType = TMP_InputField.ContentType.Standard;
+            }
+
+                this.key = key;
             this.defaultValue = defaultValue;
             this.valueType = valueType;
             this.sliderRange = sliderRange;
