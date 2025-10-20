@@ -133,8 +133,12 @@ namespace ModConfig
                     if (modTitleTransform == null)
                     {
                         GameObject modNameTitleClone = Instantiate(ModBehaviour.dropdownListPrefab, modContent.transform);
+                        modNameTitleClone.SetActive(false);
+
                         modNameTitleClone.name = modName;
                         modNameTitleClone.transform.DestroyAllChildren();
+
+                        Destroy(modNameTitleClone.GetComponent<OptionsUIEntry_Dropdown>());
 
                         // 创建标题文本
                         GameObject titleTextObject = new GameObject("TitleText");
@@ -218,8 +222,12 @@ namespace ModConfig
                     if (modTitleTransform == null)
                     {
                         GameObject modNameTitleClone = Instantiate(ModBehaviour.dropdownListPrefab, modContent.transform);
+                        modNameTitleClone.SetActive(false);
+
                         modNameTitleClone.name = modName;
                         modNameTitleClone.transform.DestroyAllChildren();
+
+                        Destroy(modNameTitleClone.GetComponent<OptionsUIEntry_Dropdown>());
 
                         // 创建标题文本
                         GameObject titleTextObject = new GameObject("TitleText");
@@ -450,6 +458,8 @@ namespace ModConfig
 
             Destroy(optionsUIEntry_Slider);
 
+            UI_MouseSensitivity_Clone.SetActive(false);
+
             OptionsUIEntry_Slider_Mod UIEntry_Slider_Mod = UI_MouseSensitivity_Clone.AddComponent<OptionsUIEntry_Slider_Mod>();
 
             //将旧的3个组件加到新的OptionsUIEntry_Slider_Mod
@@ -458,6 +468,8 @@ namespace ModConfig
             UIEntry_Slider_Mod.valueField = valueField;
 
             UIEntry_Slider_Mod.label.SetText("OptionsUIEntry_Slider_Mod");
+
+            UI_MouseSensitivity_Clone.SetActive(true);
 
             ModBehaviour.inputWithSliderPrefab = UI_MouseSensitivity_Clone;
         }
