@@ -170,6 +170,18 @@ namespace ModConfig
             });
         }
 
+        public static void AddBoolDropdownList(string modName, string key, string description, bool defaultValue)
+        {
+            var dict = new SortedDictionary<string, object>()
+            {
+                {"True", true},
+                {"False", false},
+            };
+
+            AddDropdownList(modName, key, description, dict, typeof(bool), defaultValue);
+        }
+
+
         /// <summary>
         /// 添加一个输入框, 可选是否带滑条
         /// </summary>
