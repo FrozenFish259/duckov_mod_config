@@ -5,11 +5,13 @@
 [*]第一次启用或重新开关本mod后可能需要重启游戏以生效。
 [/list]
 
+[img]https://images.steamusercontent.com/ugc/18308003542399829868/2FA2DF264BAF657E99EB727C0372E10BE4669CBC/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false[/img]
+
 [h2]配置文件位置[/h2]
 
 如果你想重置mod配置, 可以删除下面的文件
 [quote]
-%USERPROFILE%\AppData\LocalLow\TeamSoda\Duckov\Saves\Mods.ES3
+%USERPROFILE%\AppData\LocalLow\TeamSoda\Duckov\Saves\ModConfig.ES3
 [/quote]
 
 [h1]开发指南[/h1]

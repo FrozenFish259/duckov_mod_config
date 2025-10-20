@@ -5,11 +5,13 @@
 [*]You may need to restart game after enabling [i]ModConfig[/i]
 [/list]
 
+[img]https://images.steamusercontent.com/ugc/18308003542399829868/2FA2DF264BAF657E99EB727C0372E10BE4669CBC/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false[/img]
+
 [h2]Mod Settings File Location[/h2]
 
 Delete following file if you wanna reset ModConfig's mod settings
 [quote]
-%USERPROFILE%\AppData\LocalLow\TeamSoda\Duckov\Saves\Mods.ES3
+%USERPROFILE%\AppData\LocalLow\TeamSoda\Duckov\Saves\ModConfig.ES3
 [/quote]
 
 [h1]Development Guide[/h1]

@@ -7,7 +7,7 @@
 
 ## 配置文件位置
 如果你想重置mod配置, 可以删除下面的文件
-> %USERPROFILE%\AppData\LocalLow\TeamSoda\Duckov\Saves\Mods.ES3
+> %USERPROFILE%\AppData\LocalLow\TeamSoda\Duckov\Saves\ModConfig.ES3
 
 # 开发指南
 
@@ -42,7 +42,7 @@
 
 ## Mod Settings File Location
 Delete following file if you wanna reset ModConfig's mod settings
-> %USERPROFILE%\AppData\LocalLow\TeamSoda\Duckov\Saves\Mods.ES3
+> %USERPROFILE%\AppData\LocalLow\TeamSoda\Duckov\Saves\ModConfig.ES3
 
 # Development Guide
 
