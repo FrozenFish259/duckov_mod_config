@@ -194,7 +194,6 @@ namespace ModConfig
         /// <param name="sliderRange">滑条范围, 如果不需要则填null</param>
         public static void AddInputWithSlider(string modName, string key, string description, Type valueType, object defaultValue, Vector2? sliderRange = null)
         {
-            //TODO: 待实现
             AddConfig(() => {
                 // 安全检查
                 if (inputWithSliderPrefab == null)
@@ -276,11 +275,13 @@ namespace ModConfig
         
         void Awake()
         {
+            ExampleUsingModConfig.OnActive();
             Debug.Log("ModConfig Mod Awake");
         }
 
         void OnDestroy()
         {
+            ExampleUsingModConfig.OnDeactivate();
             // 清理静态变量
             modTabButton = null;
             modContent = null;

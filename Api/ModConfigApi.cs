@@ -98,10 +98,10 @@ public static class ModConfigAPI
             // 检查必要的静态方法是否存在
             // Check if necessary static methods exist
             string[] requiredMethods = {
-                "AddDropdownList",
-                "AddInputWithSlider",
-                "AddBoolDropdownList"
-            };
+            "AddDropdownList",
+            "AddInputWithSlider",
+            "AddBoolDropdownList"
+        };
 
             foreach (string methodName in requiredMethods)
             {
