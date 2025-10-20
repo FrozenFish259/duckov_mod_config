@@ -3,6 +3,7 @@ using Duckov.Utilities;
 using SodaCraft.Localizations;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
@@ -445,6 +446,16 @@ namespace ModConfig
 
             GameObject UI_MouseSensitivity_Clone = Instantiate(UI_MouseSensitivity);
             UI_MouseSensitivity_Clone.SetActive(true);
+
+            //这里不知道为什么有好多组件都是未激活状态
+            foreach(var mono in UI_MouseSensitivity_Clone.GetComponentsInChildren<UnityEngine.Behaviour>(true))
+            {
+                if (mono != null)
+                {
+                    mono.enabled = true;
+                }
+            }
+
             DontDestroyOnLoad(UI_MouseSensitivity_Clone);
 
             OptionsUIEntry_Slider optionsUIEntry_Slider = UI_MouseSensitivity_Clone.GetComponent<OptionsUIEntry_Slider>();
@@ -456,7 +467,7 @@ namespace ModConfig
             var slider = ReflectionHelper.GetFieldValue<UnityEngine.UI.Slider>(optionsUIEntry_Slider, "slider");
             var valueField = ReflectionHelper.GetFieldValue<TMP_InputField>(optionsUIEntry_Slider, "valueField");
 
-            Destroy(optionsUIEntry_Slider);
+            DestroyImmediate(optionsUIEntry_Slider);
 
             UI_MouseSensitivity_Clone.SetActive(false);
 
