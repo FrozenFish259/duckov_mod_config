@@ -20,7 +20,7 @@ namespace ModConfig
             {
                 try
                 {
-                    Type? oldType = ES3Helper.getType(key);
+                    Type? oldType = ES3Helper.getOldTypeOfKeyCached(key);
                     if (oldType != valueType)
                     {
                         Debug.LogWarning($"检测到{key}旧配置项类型{oldType}与当前类型{valueType}不同, 已重置为新的默认值");

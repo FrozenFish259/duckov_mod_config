@@ -15,7 +15,7 @@ namespace ModConfig
 
         public static string FilePath => Path.Combine(Folder, "Options.ES3");
 
-        private static ES3Settings SaveSettings
+        public static ES3Settings SaveSettings
         {
             get
             {

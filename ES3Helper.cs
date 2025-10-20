@@ -10,16 +10,12 @@ namespace ModConfig
 {
     class ES3Helper
     {
-        private static ES3Settings? _SaveSettings = null;
+        private static Dictionary<string, Type> cachedDict = new Dictionary<string, Type>();
         private static ES3Settings SaveSettings
         {
             get
             {
-                if(_SaveSettings == null)
-                {
-                    _SaveSettings = ReflectionHelper.GetStaticPropertyValue<ES3Settings>(typeof(OptionsManager_Mod), "SaveSettings");
-                }
-                return _SaveSettings;
+                return OptionsManager_Mod.SaveSettings;
             }
         }
 
@@ -28,8 +24,13 @@ namespace ModConfig
             ES3.DeleteKey(key, SaveSettings);
         }
 
-        public static Type? getType(string key)
+        public static Type? getOldTypeOfKeyCached(string key)
         {
+            if (cachedDict.ContainsKey(key))
+            {
+                return cachedDict[key];
+            }
+
             using ES3Reader eS3Reader = ES3Reader.Create(SaveSettings);
             if (eS3Reader == null)
             {
@@ -45,6 +46,8 @@ namespace ModConfig
 
             //Type type = eS3Reader.ReadKeyPrefix();            
             Type? type = (Type?)ReflectionHelper.InvokeInstanceMethod(eS3Reader, "ReadKeyPrefix", new object[] { false });
+
+            cachedDict.Add(key, type);
 
             return type;
         }        
