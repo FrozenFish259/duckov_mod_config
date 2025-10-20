@@ -48,6 +48,7 @@ namespace ModConfig
             {
                 try
                 {
+                    Debug.Log("正在设置配置值");
                     if (valueType == typeof(int))
                     {
                         int intValue = Convert.ToInt32(value);
@@ -252,6 +253,18 @@ namespace ModConfig
             if (this.label != null)
                 this.label.SetText(description);
 
+            if (sliderRange != null)
+            {
+                if (valueType == typeof(float))
+                {
+                    float defaultV = Convert.ToSingle(defaultValue);
+                    if (defaultV < sliderRange.Value.x || defaultV > sliderRange.Value.y)
+                    {
+                        Debug.LogError($"配置项{key}的默认值超出设置的范围!!!");
+                    }
+                }
+            }
+
             // 设置slider的范围
             if (sliderRange.HasValue && this.slider != null)
             {
@@ -276,8 +289,7 @@ namespace ModConfig
                 this.slider.gameObject.SetActive(false);
             }
 
-
-             initDone = true;
+            initDone = true;
 
             // 初始化显示
             RefreshValues();
