@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -272,7 +273,18 @@ namespace ModConfig
                 }
             });
         }
-        
+
+
+        public static void AddOnOptionsChangedDelegate(Action<string> action)
+        {
+            OptionsManager_Mod.OnOptionsChanged += action;
+        }
+
+        public static void RemoveOnOptionsChangedDelegate(Action<string> action)
+        {
+            OptionsManager_Mod.OnOptionsChanged -= action;
+        }
+
         void Awake()
         {
             //ExampleUsingModConfig.OnActive();
@@ -541,5 +553,6 @@ namespace ModConfig
         {
             MainMenu.OnMainMenuAwake -= OnMenuAwake;
         }
+
     }
 }

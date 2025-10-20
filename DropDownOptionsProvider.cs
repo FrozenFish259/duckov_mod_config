@@ -66,13 +66,13 @@ namespace ModConfig
         private object GetCurrentValue()
         {
             if (valueType == typeof(int))
-                return OptionsManager.Load<int>(this.Key, (int)defaultValue);
+                return OptionsManager_Mod.Load<int>(this.Key, (int)defaultValue);
             else if (valueType == typeof(float))
-                return OptionsManager.Load<float>(this.Key, (float)defaultValue);
+                return OptionsManager_Mod.Load<float>(this.Key, (float)defaultValue);
             else if (valueType == typeof(string))
-                return OptionsManager.Load<string>(this.Key, (string)defaultValue);
+                return OptionsManager_Mod.Load<string>(this.Key, (string)defaultValue);
             else if (valueType == typeof(bool))
-                return OptionsManager.Load<bool>(this.Key, (bool)defaultValue);
+                return OptionsManager_Mod.Load<bool>(this.Key, (bool)defaultValue);
             else
             {
                 Debug.LogError($"不支持的配置值类型: {valueType}");
@@ -86,13 +86,13 @@ namespace ModConfig
         private void SaveValue(object value)
         {
             if (valueType == typeof(int))
-                OptionsManager.Save<int>(this.Key, (int)value);
+                OptionsManager_Mod.Save<int>(this.Key, (int)value);
             else if (valueType == typeof(float))
-                OptionsManager.Save<float>(this.Key, (float)value);
+                OptionsManager_Mod.Save<float>(this.Key, (float)value);
             else if (valueType == typeof(string))
-                OptionsManager.Save<string>(this.Key, (string)value);
+                OptionsManager_Mod.Save<string>(this.Key, (string)value);
             else if (valueType == typeof(bool))
-                OptionsManager.Save<bool>(this.Key, (bool)value);
+                OptionsManager_Mod.Save<bool>(this.Key, (bool)value);
             else
                 Debug.LogError($"不支持的配置值类型: {valueType}");
         }

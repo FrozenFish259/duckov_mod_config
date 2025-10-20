@@ -15,7 +15,7 @@
 
 [h3]Important Notes[/h3]
 [list]
-[*]Configuration values are read through [i]OptionsManager.Load<T>(string key, T defaultV)[/i]
+[*]Configuration values are read through [i]OptionsManager_Mod.Load<T>(string key, T defaultV)[/i]
 [*]The implementation logic of [i]ModConfig[/i] is relatively complex. There is a possibility that future game updates may broke [i]ModConfig[/i] and require maintenance. Therefore, please note the following important tip
 [*]Do not create strong dependencies between your mod's configuration read/write logic and [i]ModConfig[/i]. Your configuration read/write must function normally even without [i]ModConfig[/i]
 [/list]

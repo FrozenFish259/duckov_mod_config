@@ -17,7 +17,7 @@ namespace ModConfig
             {
                 if(_SaveSettings == null)
                 {
-                    _SaveSettings = ReflectionHelper.GetStaticPropertyValue<ES3Settings>(typeof(OptionsManager), "SaveSettings");
+                    _SaveSettings = ReflectionHelper.GetStaticPropertyValue<ES3Settings>(typeof(OptionsManager_Mod), "SaveSettings");
                 }
                 return _SaveSettings;
             }

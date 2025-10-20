@@ -28,13 +28,13 @@ namespace ModConfig
                     }
 
                     if (valueType == typeof(int))
-                        return OptionsManager.Load<int>(this.key, (int)defaultValue);
+                        return OptionsManager_Mod.Load<int>(this.key, (int)defaultValue);
                     else if (valueType == typeof(float))
                     {
                         Debug.Log("正在读取float配置默认值");
                         float defaultV = Convert.ToSingle(defaultValue);
                         Debug.Log("float配置默认值为" + defaultV.ToString("F1"));
-                        float loaded = OptionsManager.Load<float>(this.key, defaultV);
+                        float loaded = OptionsManager_Mod.Load<float>(this.key, defaultV);
                         Debug.Log("float配置数值已读取=" + loaded.ToString("F1"));
 
                         return loaded;
@@ -42,12 +42,12 @@ namespace ModConfig
                     else if (valueType == typeof(string))
                     {
                         Debug.Log("正在读取string配置默认值");
-                        return OptionsManager.Load<string>(this.key, (string)defaultValue);
+                        return OptionsManager_Mod.Load<string>(this.key, (string)defaultValue);
                     }
                     else if (valueType == typeof(bool))
                     {
                         Debug.Log("正在读取bool配置默认值");
-                        return OptionsManager.Load<bool>(this.key, (bool)defaultValue);
+                        return OptionsManager_Mod.Load<bool>(this.key, (bool)defaultValue);
                     }
                     else
                     {
@@ -69,21 +69,21 @@ namespace ModConfig
                     if (valueType == typeof(int))
                     {
                         int intValue = Convert.ToInt32(value);
-                        OptionsManager.Save<int>(this.key, intValue);
+                        OptionsManager_Mod.Save<int>(this.key, intValue);
                     }
                     else if (valueType == typeof(float))
                     {
                         float floatValue = Convert.ToSingle(value);
-                        OptionsManager.Save<float>(this.key, floatValue);
+                        OptionsManager_Mod.Save<float>(this.key, floatValue);
                     }
                     else if (valueType == typeof(string))
                     {
-                        OptionsManager.Save<string>(this.key, value?.ToString() ?? "");
+                        OptionsManager_Mod.Save<string>(this.key, value?.ToString() ?? "");
                     }
                     else if (valueType == typeof(bool))
                     {
                         bool boolValue = Convert.ToBoolean(value);
-                        OptionsManager.Save<bool>(this.key, boolValue);
+                        OptionsManager_Mod.Save<bool>(this.key, boolValue);
                     }
                     else
                     {

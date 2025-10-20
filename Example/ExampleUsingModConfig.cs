@@ -1,4 +1,5 @@
 ﻿using Duckov.Options;
+using ModConfig;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,7 +35,7 @@ class ExampleUsingModConfig
     public static void OnActive()
     {
 
-        OptionsManager.OnOptionsChanged += OnOptionsChanged;
+        OptionsManager_Mod.OnOptionsChanged += OnOptionsChanged;
 
         bool checkModConfig = ModConfigAPI.Initialize();
 
@@ -95,7 +96,7 @@ class ExampleUsingModConfig
 
     public static void OnDeactivate()
     {
-        OptionsManager.OnOptionsChanged -= OnOptionsChanged;
+        OptionsManager_Mod.OnOptionsChanged -= OnOptionsChanged;
     }
 
     private static void OnOptionsChanged(string key)
@@ -106,7 +107,7 @@ class ExampleUsingModConfig
     private static void UpdateModLogic()
     {
         //Update your mod's configs...
-        money = OptionsManager.Load<int>($"{MOD_NAME}_{nameof(money)}", 0);
+        money = OptionsManager_Mod.Load<int>($"{MOD_NAME}_{nameof(money)}", 0);
 
         Debug.Log($"my money left={money}");
 

@@ -15,7 +15,7 @@
 
 [h3]注意事项[/h3]
 [list]
-[*]配置项数值是通过 [i]OptionsManager.Load<T>(string key, T defaultV)[/i] 读取的
+[*]配置项数值是通过 [i]OptionsManager_Mod.Load<T>(string key, T defaultV)[/i] 读取的
 [*][i]ModConfig[/i]实现逻辑较复杂, 不排除未来游戏某次更新后会导致其失效并需要重新维护的可能性, 因为有了下面这条注意事项
 [*]禁止将你的mod配置读写逻辑与 [i]ModConfig[/i] 建立强依赖关系, 配置读写即使没有 [i]ModConfig[/i] 也必须满足正常功能
 [/list]

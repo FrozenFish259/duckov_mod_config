@@ -16,7 +16,7 @@
 * string
 
 ### 注意事项
-* 配置项数值是通过 `OptionsManager.Load<T>(string key, T defaultV)` 读取的
+* 配置项数值是通过 `OptionsManager_Mod.Load<T>(string key, T defaultV)` 读取的
 * `ModConfig`实现逻辑较复杂, 不排除未来游戏某次更新后会导致其失效并需要重新维护的可能性, 因为有了下面这条注意事项
 * 禁止将你的mod配置读写逻辑与 `ModConfig` 建立强依赖关系, 配置读写即使没有 `ModConfig` 也必须满足正常功能
 
@@ -46,7 +46,7 @@
 * string
 
 ### Important Notes
-* Configuration values are read through `OptionsManager.Load<T>(string key, T defaultV)`
+* Configuration values are read through `OptionsManager_Mod.Load<T>(string key, T defaultV)`
 * The implementation logic of `ModConfig` is relatively complex. There is a possibility that future game updates may broke `ModConfig` and require maintenance. Therefore, please note the following important tip
 * Do not create strong dependencies between your mod's configuration read/write logic and `ModConfig`. Your configuration read/write must function normally even without `ModConfig`
 

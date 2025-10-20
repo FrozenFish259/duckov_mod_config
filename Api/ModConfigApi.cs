@@ -101,10 +101,12 @@ public static class ModConfigAPI
             // 检查必要的静态方法是否存在
             // Check if necessary static methods exist
             string[] requiredMethods = {
-            "AddDropdownList",
-            "AddInputWithSlider",
-            "AddBoolDropdownList"
-        };
+                "AddDropdownList",
+                "AddInputWithSlider",
+                "AddBoolDropdownList",
+                "AddOnOptionsChangedDelegate",
+                "RemoveOnOptionsChangedDelegate",
+            };
 
             foreach (string methodName in requiredMethods)
             {
@@ -175,6 +177,70 @@ public static class ModConfigAPI
         {
             Debug.LogError($"[{TAG}] 程序集扫描失败: {ex.Message}");
             return null;
+        }
+    }
+
+    /// <summary>
+    /// 安全地添加选项变更事件委托
+    /// Safely add options changed event delegate
+    /// </summary>
+    /// <param name="action">事件处理委托，参数为变更的选项键名</param>
+    /// <returns>是否成功添加</returns>
+    public static bool SafeAddOnOptionsChangedDelegate(Action<string> action)
+    {
+        if (!Initialize())
+            return false;
+
+        if (action == null)
+        {
+            Debug.LogWarning($"[{TAG}] 不能添加空的事件委托");
+            return false;
+        }
+
+        try
+        {
+            MethodInfo method = modBehaviourType.GetMethod("AddOnOptionsChangedDelegate", BindingFlags.Public | BindingFlags.Static);
+            method.Invoke(null, new object[] { action });
+
+            Debug.Log($"[{TAG}] 成功添加选项变更事件委托");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[{TAG}] 添加选项变更事件委托失败: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 安全地移除选项变更事件委托
+    /// Safely remove options changed event delegate
+    /// </summary>
+    /// <param name="action">要移除的事件处理委托</param>
+    /// <returns>是否成功移除</returns>
+    public static bool SafeRemoveOnOptionsChangedDelegate(Action<string> action)
+    {
+        if (!Initialize())
+            return false;
+
+        if (action == null)
+        {
+            Debug.LogWarning($"[{TAG}] 不能移除空的事件委托");
+            return false;
+        }
+
+        try
+        {
+            MethodInfo method = modBehaviourType.GetMethod("RemoveOnOptionsChangedDelegate", BindingFlags.Public | BindingFlags.Static);
+            method.Invoke(null, new object[] { action });
+
+            Debug.Log($"[{TAG}] 成功移除选项变更事件委托");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[{TAG}] 移除选项变更事件委托失败: {ex.Message}");
+            return false;
         }
     }
 
