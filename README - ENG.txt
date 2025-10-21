@@ -6,6 +6,10 @@
 [/list]
 
 [img]https://images.steamusercontent.com/ugc/18308003542399829868/2FA2DF264BAF657E99EB727C0372E10BE4669CBC/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false[/img]
+[h2]Supported mods[/h2]
+[list]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=3588412062]KillFeed[/url] shows killfeed
+[/list]
 
 [h2]Mod Settings File Location[/h2]
 
@@ -44,4 +48,5 @@ After uploading your mod, go to workshop item page and click [i]Add/Remove Requi
 
 [h2]Source Code Reference[/h2]
 
-[url=https://github.com/FrozenFish259/duckov_mod_config]Github Project[/url]
+[url=https://github.com/FrozenFish259/duckov_mod_config]Github Source[/url]
+[url=https://github.com/FrozenFish259/duckov_mod_config_example]Github Example Project[/url]

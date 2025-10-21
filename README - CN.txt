@@ -6,6 +6,12 @@
 [/list]
 
 [img]https://images.steamusercontent.com/ugc/18308003542399829868/2FA2DF264BAF657E99EB727C0372E10BE4669CBC/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false[/img]
+[h2]支持的mod[/h2]
+[list]
+[*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=3588412062]KillFeed[/url] 一款显示击杀记录的mod
+[/list]
+
+[img]./20251020163234_1.jpg[/img]
 
 [h2]配置文件位置[/h2]
 
@@ -44,4 +50,5 @@
 
 [h2]源码参考[/h2]
 
-[url=https://github.com/FrozenFish259/duckov_mod_config]Github项目[/url]
+[url=https://github.com/FrozenFish259/duckov_mod_config]Github源码[/url]
+[url=https://github.com/FrozenFish259/duckov_mod_config_example]Github演示项目[/url]

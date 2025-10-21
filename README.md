@@ -3,6 +3,9 @@
 * Mod设置菜单需要进入游戏场景后再打开设置才能看到, 主菜单中设置里暂不可见。  
 * 第一次启用或重新开关本mod后可能需要重启游戏以生效。
 
+##  当前支持的mod
+* [KillFeed](https://steamcommunity.com/sharedfiles/filedetails/?id=3588412062) 一款显示击杀记录的mod
+
 ![ScreenShot](./20251020163234_1.jpg)
 
 ## 配置文件位置
@@ -39,6 +42,9 @@
 * `ModConfig` is a framework that provides in-game configuration parameter adjustment for other mods.It allows players to directly adjust various configuration parameters of other mods through the in-game settings menu.  
 * `Mod Settings` menu currently can only be accessed from ingame scenes, not from MainMenu  
 * You may need to restart game after enabling `ModConfig`
+
+## Supported mods
+* [KillFeed](https://steamcommunity.com/sharedfiles/filedetails/?id=3588412062) shows killfeed
 
 ## Mod Settings File Location
 Delete following file if you wanna reset ModConfig's mod settings
