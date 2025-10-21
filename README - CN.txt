@@ -6,12 +6,10 @@
 [/list]
 
 [img]https://images.steamusercontent.com/ugc/18308003542399829868/2FA2DF264BAF657E99EB727C0372E10BE4669CBC/?imw=5000&imh=5000&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=false[/img]
-[h2]支持的mod[/h2]
+[h2]当前支持的mod[/h2]
 [list]
 [*][url=https://steamcommunity.com/sharedfiles/filedetails/?id=3588412062]KillFeed[/url] 一款显示击杀记录的mod
 [/list]
-
-[img]./20251020163234_1.jpg[/img]
 
 [h2]配置文件位置[/h2]
 
