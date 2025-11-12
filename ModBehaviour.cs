@@ -504,6 +504,7 @@ namespace ModConfig
             UIEntry_Slider_Mod.label.SetText("OptionsUIEntry_Slider_Mod");
 
             UI_MouseSensitivity_Clone.SetActive(true);
+            UI_MouseSensitivity_Clone.transform.localScale = Vector3.one;
 
             ModBehaviour.inputWithSliderPrefab = UI_MouseSensitivity_Clone;
         }
